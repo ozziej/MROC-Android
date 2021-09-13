@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/profileFragment"
+        android:enabled="true"
+        android:icon="@drawable/ic_baseline_perm_identity_24"
+        android:title="@string/profile"
+        app:showAsAction="always"/>
+    <item
+        android:id="@+id/groupListFragment"
+        android:enabled="true"
+        android:icon="@drawable/ic_baseline_chat_24"
+        android:title="@string/Chat"
+        app:showAsAction="always"/>
+</menu>

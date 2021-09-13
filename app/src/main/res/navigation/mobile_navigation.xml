@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@id/mainFragment">
+
+    <fragment
+        android:id="@+id/mainFragment"
+        android:name="com.surveyfiesta.mroc.ui.main.MainFragment"
+        android:label="Landing Page"
+        tools:layout="@layout/main_fragment" >
+        <action
+            android:id="@+id/action_mainFragment_to_profileFragment"
+            app:destination="@id/profileFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.surveyfiesta.mroc.ui.login.LoginFragment"
+        android:label="Login"
+        tools:layout="@layout/login_fragment" />
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.surveyfiesta.mroc.ui.home.ProfileFragment"
+        android:label="Your Profile"
+        tools:layout="@layout/profile_fragment" />
+    <fragment
+        android:id="@+id/groupChatFragment"
+        android:name="com.surveyfiesta.mroc.ui.chat.GroupChatFragment"
+        android:label="Groups"
+        tools:layout="@layout/group_chat_fragment"/>
+    <fragment
+        android:id="@+id/groupListFragment"
+        android:name="com.surveyfiesta.mroc.ui.grouplist.GroupListFragment"
+        android:label="Group List"
+        tools:layout="@layout/group_list_fragment" />
+
+</navigation>
