@@ -33,6 +33,12 @@
         android:id="@+id/groupListFragment"
         android:name="com.surveyfiesta.mroc.ui.grouplist.GroupListFragment"
         android:label="Group List"
-        tools:layout="@layout/group_list_fragment" />
+        tools:layout="@layout/group_list_fragment" >
+        <action
+            android:id="@+id/action_groupListFragment_to_groupChatFragment"
+            app:destination="@id/groupChatFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim" />
+    </fragment>
 
 </navigation>

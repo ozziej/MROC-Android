@@ -60,9 +60,8 @@ public class GroupListAdapater extends RecyclerView.Adapter<GroupListAdapater.Gr
         holder.groupNameText.setText(selectedGroup.getGroupName());
         holder.groupDescriptionText.setText(selectedGroup.getGroupDescription());
 
-        holder.groupImage.setOnClickListener(view -> {
+        holder.itemView.setOnClickListener(view -> {
             listener.chatGroupListener(view, holder.getAbsoluteAdapterPosition());
-            Log.i("action","image clicked");
         });
     }
 
@@ -75,7 +74,7 @@ public class GroupListAdapater extends RecyclerView.Adapter<GroupListAdapater.Gr
         return groupList.size();
     }
 
-    public class GroupViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class GroupViewHolder extends RecyclerView.ViewHolder {
         TextView groupNameText;
         TextView groupDescriptionText;
         ImageView groupImage;
@@ -86,13 +85,6 @@ public class GroupListAdapater extends RecyclerView.Adapter<GroupListAdapater.Gr
             this.groupDescriptionText = itemView.findViewById(R.id.groupDescriptionText);
             this.groupNameText = itemView.findViewById(R.id.groupNameText);
             itemView.setClickable(true);
-            itemView.setOnClickListener(this::onClick);
-        }
-
-        @Override
-        public void onClick(View view) {
-            int position = getAbsoluteAdapterPosition();
-            Log.i("View Holder Hit","Position :"+position+" Group "+groupList.get(position).getGroupName());
         }
     }
 }

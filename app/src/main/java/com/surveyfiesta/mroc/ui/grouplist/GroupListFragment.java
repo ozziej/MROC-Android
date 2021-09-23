@@ -11,11 +11,11 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.surveyfiesta.mroc.R;
 import com.surveyfiesta.mroc.adapters.GroupListAdapater;
 import com.surveyfiesta.mroc.entities.GroupChat;
@@ -24,7 +24,6 @@ import com.surveyfiesta.mroc.interfaces.ChatGroupListener;
 import com.surveyfiesta.mroc.ui.login.UserViewModel;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class GroupListFragment extends Fragment implements ChatGroupListener {
     private RecyclerView recyclerView;
@@ -51,12 +50,14 @@ public class GroupListFragment extends Fragment implements ChatGroupListener {
         UserViewModel userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
         currentUser = userViewModel.getCurrentUserData().getValue();
         if (currentUser != null) {
-            groupListViewModel.setSelectedUser(currentUser);
-
-            final NavController navController = Navigation.findNavController(view);
             recyclerView = view.findViewById(R.id.groupListRecycler);
+            groupListAdapater = new GroupListAdapater(new ArrayList<>(), getContext(), this::chatGroupListener);
+            recyclerView.setAdapter(groupListAdapater);
 
-            groupListViewModel.findUserChats();
+            recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+            recyclerView.setHasFixedSize(true);
+
+            groupListViewModel.findUserChats(currentUser);
 
             groupListViewModel.getGroupChatData().observe(getViewLifecycleOwner(), groupChatList -> {
                 if (groupChatList != null) {
@@ -64,15 +65,18 @@ public class GroupListFragment extends Fragment implements ChatGroupListener {
                     recyclerView.setAdapter(groupListAdapater);
                 }
             });
-            recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-            recyclerView.setHasFixedSize(true);
         }
-
-
     }
 
     @Override
     public void chatGroupListener(View view, int position) {
-        Log.i("Fragment ", "Info :"+view.toString()+ " position: " +position+" item :"+groupListAdapater.getGroupList().get(position).getGroupName());
+        GroupChat groupChat = groupListAdapater.getGroupList().get(position);
+        groupListViewModel.setSelectedChatData(groupChat);
+
+        if (groupChat != null) {
+            Navigation.findNavController(view).navigate(R.id.action_groupListFragment_to_groupChatFragment);
+        } else {
+            Snackbar.make(view, "Nothing Selected!", Snackbar.LENGTH_SHORT);
+        }
     }
 }

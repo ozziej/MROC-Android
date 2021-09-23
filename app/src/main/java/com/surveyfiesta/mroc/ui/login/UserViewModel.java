@@ -48,7 +48,6 @@ public class UserViewModel extends ViewModel {
             @Override
             public void onFailure(Call<Users> call, Throwable t) {
                 currentUserData.setValue(null);
-                Log.e("Login Failure", t.getLocalizedMessage());
                 loginResult.setValue("FAILED");
             }
         });

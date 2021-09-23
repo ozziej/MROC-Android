@@ -18,12 +18,12 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 
 public class GroupListViewModel extends ViewModel {
     private final MutableLiveData<List<GroupChat>> groupChatData = new MutableLiveData<>();
-    private Users selectedUser;
+    MutableLiveData <GroupChat> selectedChatData = new MutableLiveData<>();
 
     public GroupListViewModel() {
     }
 
-    public void findUserChats(){
+    public void findUserChats(Users selectedUser) {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(DefaultValues.BASE_CHAT_URL)
                 .addConverterFactory(JacksonConverterFactory.create())
@@ -53,7 +53,11 @@ public class GroupListViewModel extends ViewModel {
         return groupChatData;
     }
 
-    public void setSelectedUser(Users selectedUser){
-        this.selectedUser = selectedUser;
+    public GroupChat getSelectedChatData() {
+        return selectedChatData.getValue();
+    }
+
+    public void setSelectedChatData(GroupChat selectedChat) {
+        this.selectedChatData.setValue(selectedChat);
     }
 }

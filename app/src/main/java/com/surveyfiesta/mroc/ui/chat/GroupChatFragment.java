@@ -1,26 +1,74 @@
 package com.surveyfiesta.mroc.ui.chat;
 
+import static android.content.Context.INPUT_METHOD_SERVICE;
+
+import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.app.Activity;
+import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.PaintDrawable;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.TextView;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.google.android.material.snackbar.Snackbar;
 import com.surveyfiesta.mroc.R;
+import com.surveyfiesta.mroc.entities.GroupChat;
+import com.surveyfiesta.mroc.entities.InstantNotification;
+import com.surveyfiesta.mroc.entities.Users;
+import com.surveyfiesta.mroc.ui.grouplist.GroupListViewModel;
+import com.surveyfiesta.mroc.ui.login.UserViewModel;
+
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.WebSocket;
+import okhttp3.WebSocketListener;
 
 public class GroupChatFragment extends Fragment {
 
-    private GroupChatViewModel mViewModel;
+    private Button sendChatButton;
+    private EditText chatTextView;
+    private LinearLayout chatLayout;
+    private ScrollView chatScrollView;
+    private WebSocket webSocket;
+    private Users currentUser;
+    private GroupChat groupChat;
+    private UserViewModel userViewModel;
+    private GroupChatViewModel groupChatViewModel;
+    private GroupListViewModel groupListViewModel;
+
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public static GroupChatFragment newInstance() {
         return new GroupChatFragment();
     }
+    private WebSocketListener socketListener;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -31,5 +79,178 @@ public class GroupChatFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
+        groupListViewModel = new ViewModelProvider(requireActivity()).get(GroupListViewModel.class);
+
+        groupChatViewModel = new ViewModelProvider(this).get(GroupChatViewModel.class);
+
+        sendChatButton = view.findViewById(R.id.sendChatButton);
+        chatTextView = view.findViewById(R.id.chatTextView);
+        chatLayout = view.findViewById(R.id.chatLayout);
+        chatScrollView = view.findViewById(R.id.chatScrollView);
+        objectMapper.findAndRegisterModules();
+        objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+
+        currentUser = userViewModel.getCurrentUserData().getValue();
+        groupChat = groupListViewModel.getSelectedChatData();
+
+        sendChatButton.setOnClickListener(l -> {
+            String chatText = chatTextView.getText().toString();
+            if (!chatText.isEmpty()) {
+                hideKeyboard(view);
+                chatTextView.setText("");
+                webSocket.send(encodeMessage(groupChat.getGroupId(),currentUser.getUserId(), chatText));
+            }
+        });
+
+        chatLayout.removeAllViews();
+        startWebSocket();
+        getInitialMessages();
+    }
+
+    private String encodeMessage(Integer groupId, Integer userId, String messageBody) {
+        String jsonText = "{\"groupId\":"+groupId+
+                ",\"userId\":"+userId+
+                ",\"messageBody\":\""+messageBody+"\"}";
+        return jsonText;
+    }
+
+    private void startWebSocket() {
+        socketListener = new WebSocketListener() {
+            @Override
+            public void onOpen(WebSocket webSocket, Response response) {
+                Log.d("Connected :",response.body().toString());
+            }
+
+            @Override
+            public void onMessage(WebSocket webSocket, String text) {
+                final InstantNotification notification;
+                try {
+                    notification = objectMapper.readValue(text, new TypeReference<InstantNotification>() {
+                    });
+                    Integer groupId = notification.getRecipientId();
+                    if (groupChat != null && groupChat.getGroupId().equals(groupId)) {
+                        Activity activity = getActivity();
+                        if (activity != null) {
+                            activity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    addMessageBox(notification);
+                                }
+                            });
+                        }
+                    }
+                } catch (JsonProcessingException ex) {
+                    Log.e("Error in JSON processing", ex.getLocalizedMessage());
+                }
+            }
+
+            @Override
+            public void onClosed(WebSocket webSocket, int code, String reason) {
+                Log.d("Closed:","Closed connection to "+groupChat.getGroupName());
+                super.onClosed(webSocket, code, reason);
+            }
+
+            @Override
+            public void onFailure(WebSocket webSocket, Throwable t, @Nullable Response response) {
+                Log.e("Error :",t.getLocalizedMessage());
+            }
+        };
+
+        OkHttpClient client = new OkHttpClient.Builder()
+                .readTimeout(0,  TimeUnit.MILLISECONDS)
+                .build();
+
+        Request request = new Request.Builder()
+                .url("ws://localhost:8080/SurveyFiesta/chat/"+currentUser.getFirstName())
+                .build();
+        webSocket = client.newWebSocket(request, socketListener);
+        client.dispatcher().executorService().shutdown();
+    }
+
+    @Override
+    public void onDestroy() {
+        webSocket.close(1000,"Hide Chat");
+        super.onDestroy();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
+
+    private void getInitialMessages() {
+        if (groupChat != null && groupChatViewModel != null) {
+            groupChatViewModel.findGroupChatMessages(groupChat);
+            groupChatViewModel.getNotificationLiveDate().observe(getViewLifecycleOwner(), instantNotifications -> {
+                instantNotifications.forEach(i ->{
+                    addMessageBox(i);
+                    Log.d("MESSAGE : ",i.getNotificationUuid());
+                });
+            });
+        }
+    }
+
+    private void hideKeyboard(View v) {
+        Context context = v.getContext();
+        InputMethodManager inputMethodManager = (InputMethodManager)context.getSystemService(INPUT_METHOD_SERVICE);
+        inputMethodManager.hideSoftInputFromWindow(v.getApplicationWindowToken(),0);
+    }
+
+    private void addMessageBox(InstantNotification notification) {
+        Boolean isCurrentUser = notification.getSenderId().equals(currentUser.getUserId());
+        LayoutInflater inflater = this.getLayoutInflater();
+        View view = inflater.inflate(R.layout.chat_bubble,null);
+        String bubbleTime;
+
+        TextView senderName = view.findViewById(R.id.chatBubbleSenderName);
+        TextView textView = view.findViewById(R.id.chatBubbleTextView);
+        TextView chatTime = view.findViewById(R.id.chatTime);
+
+        textView.setText(notification.getNotificationText());
+        textView.setTextColor(Color.BLACK);
+
+        long days = ChronoUnit.DAYS.between(notification.getDateTime(), LocalDateTime.now());
+        if (days == 0) {
+            bubbleTime = notification.getFormattedTime();
+        } else {
+            bubbleTime = notification.getFormattedDate();
+        }
+        chatTime.setText(bubbleTime);
+        chatTime.setTextColor(Color.WHITE);
+
+        senderName.setText(notification.getSenderName());
+        senderName.setPadding(4,0,4,0);
+        textView.setPadding(4,0,4,0);
+        textView.setMinEms(4);
+        textView.setMaxEms(12);
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        layoutParams.weight = 10.0f;
+        layoutParams.topMargin = 4;
+        layoutParams.rightMargin = 4;
+        layoutParams.leftMargin = 4;
+        GradientDrawable drawable;
+        String colourString;
+        if (isCurrentUser) {
+            layoutParams.gravity = Gravity.RIGHT;
+            colourString = "#66bb6a";
+        } else {
+            layoutParams.gravity = Gravity.LEFT;
+            colourString = "#c7cfce";
+        }
+        drawable = new GradientDrawable();
+        drawable.setStroke(1, Color.parseColor("#dddddd"));
+        drawable.setCornerRadius(10);
+        drawable.setColor(Color.parseColor(colourString));
+        view.setBackground(drawable);
+        view.setLayoutParams(layoutParams);
+        chatLayout.addView(view);
+        chatScrollView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                chatScrollView.fullScroll(View.FOCUS_DOWN);
+            }
+        },200);
     }
 }

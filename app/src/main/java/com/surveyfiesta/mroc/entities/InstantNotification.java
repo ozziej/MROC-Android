@@ -1,13 +1,23 @@
 package com.surveyfiesta.mroc.entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.surveyfiesta.mroc.constants.NotificationTypes;
+
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.TimeZone;
+import java.util.UUID;
 
+@JsonInclude(Include.NON_NULL)
 public class InstantNotification {
     private String notificationUuid;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime dateTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime expiryDateTime;
     private String senderName;
     private Integer senderId;
@@ -16,7 +26,11 @@ public class InstantNotification {
     private String notificationText;
     private boolean messageRead;
 
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+
     public InstantNotification() {
+        this(UUID.randomUUID().toString(), LocalDateTime.now(), null, "", 0, 0, NotificationTypes.USER.name(), "", false);
     }
 
     public InstantNotification(String notificationUuid, LocalDateTime dateTime, LocalDateTime expiryDateTime, String senderName, Integer senderId, Integer recipientId, String notificationType, String notificationText, boolean messageRead) {
@@ -43,12 +57,20 @@ public class InstantNotification {
         return dateTime;
     }
 
+    public String getFormattedTime() {
+        return timeFormatter.format(this.dateTime);
+    }
+
+    public String getFormattedDate() {
+        return formatter.format(this.dateTime);
+    }
+
     public void setDateTime(LocalDateTime dateTime) {
         this.dateTime = dateTime;
     }
 
-    public void setDateTime(Long dateTime) {
-        this.dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(dateTime), TimeZone.getDefault().toZoneId());
+    public void setDateTime(String dateTimeString) {
+        this.dateTime = LocalDateTime.parse(dateTimeString, formatter);
     }
 
     public LocalDateTime getExpiryDateTime() {
@@ -59,8 +81,8 @@ public class InstantNotification {
         this.expiryDateTime = expiryDateTime;
     }
 
-    public void setExpiryDateTime(Long expiryDateTime) {
-        this.expiryDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(expiryDateTime), TimeZone.getDefault().toZoneId());
+    public void setExpiryDateTime(String expiryDateTimeString) {
+        this.expiryDateTime = LocalDateTime.parse(expiryDateTimeString, formatter);
     }
 
     public String getSenderName() {
