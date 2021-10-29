@@ -2,14 +2,12 @@ package com.surveyfiesta.mroc.ui.chat;
 
 import static android.content.Context.INPUT_METHOD_SERVICE;
 
-import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.PaintDrawable;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -32,7 +30,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.google.android.material.snackbar.Snackbar;
 import com.surveyfiesta.mroc.R;
 import com.surveyfiesta.mroc.entities.GroupChat;
 import com.surveyfiesta.mroc.entities.InstantNotification;
@@ -41,8 +38,10 @@ import com.surveyfiesta.mroc.ui.grouplist.GroupListViewModel;
 import com.surveyfiesta.mroc.ui.login.UserViewModel;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -64,6 +63,7 @@ public class GroupChatFragment extends Fragment {
     private GroupListViewModel groupListViewModel;
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd MMMM YYYY");
 
     public static GroupChatFragment newInstance() {
         return new GroupChatFragment();
@@ -184,7 +184,18 @@ public class GroupChatFragment extends Fragment {
         if (groupChat != null && groupChatViewModel != null) {
             groupChatViewModel.findGroupChatMessages(groupChat);
             groupChatViewModel.getNotificationLiveDate().observe(getViewLifecycleOwner(), instantNotifications -> {
+                AtomicInteger previousDays = new AtomicInteger(0);
                 instantNotifications.forEach(i ->{
+                    Long days = ChronoUnit.DAYS.between(i.getDateTime(), LocalDateTime.now());
+
+                    if (days > 0 && previousDays.getAndSet(days.intValue()) != days) {
+                        drawDayBubble(dateFormatter.format(i.getDateTime()));
+                    }
+
+                    if (days == 0 && previousDays.getAndSet(days.intValue()) != days){
+                        drawDayBubble("Today");
+                    }
+
                     addMessageBox(i);
                     Log.d("MESSAGE : ",i.getNotificationUuid());
                 });
@@ -211,12 +222,7 @@ public class GroupChatFragment extends Fragment {
         textView.setText(notification.getNotificationText());
         textView.setTextColor(Color.BLACK);
 
-        long days = ChronoUnit.DAYS.between(notification.getDateTime(), LocalDateTime.now());
-        if (days == 0) {
-            bubbleTime = notification.getFormattedTime();
-        } else {
-            bubbleTime = notification.getFormattedDate();
-        }
+        bubbleTime = notification.getFormattedTime();
         chatTime.setText(bubbleTime);
         chatTime.setTextColor(Color.WHITE);
 
@@ -252,5 +258,27 @@ public class GroupChatFragment extends Fragment {
                 chatScrollView.fullScroll(View.FOCUS_DOWN);
             }
         },200);
+    }
+
+    private void drawDayBubble(String displayText) {
+        LayoutInflater inflater = this.getLayoutInflater();
+        View view = inflater.inflate(R.layout.date_bubble,null);
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        layoutParams.weight = 10.0f;
+        layoutParams.topMargin = 4;
+        layoutParams.rightMargin = 4;
+        layoutParams.leftMargin = 4;
+        layoutParams.gravity = Gravity.CENTER_HORIZONTAL;
+        TextView displayTextView = view.findViewById(R.id.dateBubbleTime);
+        displayTextView.setPadding(32,8,32,8);
+        displayTextView.setText(displayText);
+        displayTextView.setLayoutParams(layoutParams);
+        GradientDrawable drawable = new GradientDrawable();
+        drawable.setStroke(1, Color.parseColor("#dddddd"));
+        drawable.setCornerRadius(10);
+        drawable.setColor(Color.parseColor("#cccccc"));
+        view.setBackground(drawable);
+        view.setLayoutParams(layoutParams);
+        chatLayout.addView(view);
     }
 }

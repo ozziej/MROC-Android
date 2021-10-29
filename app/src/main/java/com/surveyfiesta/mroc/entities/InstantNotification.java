@@ -28,6 +28,7 @@ public class InstantNotification {
 
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd MMMM YYYY");
 
     public InstantNotification() {
         this(UUID.randomUUID().toString(), LocalDateTime.now(), null, "", 0, 0, NotificationTypes.USER.name(), "", false);
@@ -59,6 +60,10 @@ public class InstantNotification {
 
     public String getFormattedTime() {
         return timeFormatter.format(this.dateTime);
+    }
+
+    public String getFormattedDay() {
+        return dateFormatter.format(this.dateTime);
     }
 
     public String getFormattedDate() {
