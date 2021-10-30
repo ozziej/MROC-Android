@@ -26,8 +26,6 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.surveyfiesta.mroc.R;
@@ -36,18 +34,14 @@ import com.surveyfiesta.mroc.entities.InstantNotification;
 import com.surveyfiesta.mroc.entities.Users;
 import com.surveyfiesta.mroc.ui.grouplist.GroupListViewModel;
 import com.surveyfiesta.mroc.ui.login.UserViewModel;
+import com.surveyfiesta.mroc.viewmodels.WebSocketViewModel;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 import okhttp3.WebSocket;
-import okhttp3.WebSocketListener;
 
 public class GroupChatFragment extends Fragment {
 
@@ -55,12 +49,12 @@ public class GroupChatFragment extends Fragment {
     private EditText chatTextView;
     private LinearLayout chatLayout;
     private ScrollView chatScrollView;
-    private WebSocket webSocket;
     private Users currentUser;
     private GroupChat groupChat;
     private UserViewModel userViewModel;
     private GroupChatViewModel groupChatViewModel;
     private GroupListViewModel groupListViewModel;
+    private WebSocketViewModel webSocketViewModel;
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd MMMM YYYY");
@@ -68,7 +62,6 @@ public class GroupChatFragment extends Fragment {
     public static GroupChatFragment newInstance() {
         return new GroupChatFragment();
     }
-    private WebSocketListener socketListener;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -84,6 +77,7 @@ public class GroupChatFragment extends Fragment {
         groupListViewModel = new ViewModelProvider(requireActivity()).get(GroupListViewModel.class);
 
         groupChatViewModel = new ViewModelProvider(this).get(GroupChatViewModel.class);
+        webSocketViewModel = new ViewModelProvider(this).get(WebSocketViewModel.class);
 
         sendChatButton = view.findViewById(R.id.sendChatButton);
         chatTextView = view.findViewById(R.id.chatTextView);
@@ -100,7 +94,7 @@ public class GroupChatFragment extends Fragment {
             if (!chatText.isEmpty()) {
                 hideKeyboard(view);
                 chatTextView.setText("");
-                webSocket.send(encodeMessage(groupChat.getGroupId(),currentUser.getUserId(), chatText));
+                webSocketViewModel.sendMessage(encodeMessage(groupChat.getGroupId(),currentUser.getUserId(), chatText));
             }
         });
 
@@ -117,61 +111,24 @@ public class GroupChatFragment extends Fragment {
     }
 
     private void startWebSocket() {
-        socketListener = new WebSocketListener() {
-            @Override
-            public void onOpen(WebSocket webSocket, Response response) {
-                Log.d("Connected :",response.body().toString());
+        if (groupChat != null && currentUser != null) {
+            webSocketViewModel.initWebSocket(groupChat, currentUser);
+            webSocketViewModel.getNotificationLiveData().observe(getViewLifecycleOwner(), this::onChanged);
+        }
+    }
+
+    private void onChanged(InstantNotification notification) {
+        if (notification != null) {
+            Activity activity = getActivity();
+            if (activity != null) {
+                activity.runOnUiThread(() -> addMessageBox(notification));
             }
-
-            @Override
-            public void onMessage(WebSocket webSocket, String text) {
-                final InstantNotification notification;
-                try {
-                    notification = objectMapper.readValue(text, new TypeReference<InstantNotification>() {
-                    });
-                    Integer groupId = notification.getRecipientId();
-                    if (groupChat != null && groupChat.getGroupId().equals(groupId)) {
-                        Activity activity = getActivity();
-                        if (activity != null) {
-                            activity.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    addMessageBox(notification);
-                                }
-                            });
-                        }
-                    }
-                } catch (JsonProcessingException ex) {
-                    Log.e("Error in JSON processing", ex.getLocalizedMessage());
-                }
-            }
-
-            @Override
-            public void onClosed(WebSocket webSocket, int code, String reason) {
-                Log.d("Closed:","Closed connection to "+groupChat.getGroupName());
-                super.onClosed(webSocket, code, reason);
-            }
-
-            @Override
-            public void onFailure(WebSocket webSocket, Throwable t, @Nullable Response response) {
-                Log.e("Error :",t.getLocalizedMessage());
-            }
-        };
-
-        OkHttpClient client = new OkHttpClient.Builder()
-                .readTimeout(0,  TimeUnit.MILLISECONDS)
-                .build();
-
-        Request request = new Request.Builder()
-                .url("ws://localhost:8080/SurveyFiesta/chat/"+currentUser.getFirstName())
-                .build();
-        webSocket = client.newWebSocket(request, socketListener);
-        client.dispatcher().executorService().shutdown();
+        }
     }
 
     @Override
     public void onDestroy() {
-        webSocket.close(1000,"Hide Chat");
+        webSocketViewModel.closeSocket();
         super.onDestroy();
     }
 
@@ -281,4 +238,5 @@ public class GroupChatFragment extends Fragment {
         view.setLayoutParams(layoutParams);
         chatLayout.addView(view);
     }
+
 }

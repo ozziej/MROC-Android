@@ -16,5 +16,4 @@ public interface GroupChatService {
 
     @POST("getGroupMessages")
     Call<List<InstantNotification>> getGroupMessages(@Body GroupChat group);
-
 }
