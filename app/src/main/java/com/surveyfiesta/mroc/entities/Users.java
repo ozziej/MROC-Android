@@ -1,12 +1,14 @@
 package com.surveyfiesta.mroc.entities;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 public class Users {
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
-
     private Integer userId;
     private String userPass;
     private String userSalt;
@@ -22,7 +24,11 @@ public class Users {
     private String phoneNumber;
     private String cellNumber;
     private String postalAddress;
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime dateOfBirth;
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime firstRegistered;
     private String userType;
     private boolean paidParticipation;
@@ -174,10 +180,6 @@ public class Users {
         this.postalAddress = postalAddress;
     }
 
-    public void setDateOfBirth(String dateOfBirthString){
-        this.dateOfBirth = LocalDateTime.parse(dateOfBirthString, formatter);
-    }
-
     public LocalDateTime getDateOfBirth() {
         return dateOfBirth;
     }
@@ -190,9 +192,6 @@ public class Users {
         return firstRegistered;
     }
 
-    public void setFirstRegistered(String firstRegisteredString){
-        this.firstRegistered = LocalDateTime.parse(firstRegisteredString, formatter);
-    }
     public void setFirstRegistered(LocalDateTime firstRegistered) {
         this.firstRegistered = firstRegistered;
     }

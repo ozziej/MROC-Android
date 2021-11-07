@@ -15,15 +15,18 @@ import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.surveyfiesta.mroc.R;
+import com.surveyfiesta.mroc.entities.GenericResponse;
 
 public class LoginFragment extends Fragment {
 
@@ -61,16 +64,29 @@ public class LoginFragment extends Fragment {
             hideKeyboard(view);
             login(emailAddress, password, view);
         });
+
+        passwordText.setOnEditorActionListener((textView, i, keyEvent) -> {
+            boolean handled = false;
+            if (keyEvent.getAction() == KeyEvent.ACTION_DOWN && keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+                String emailAddress = emailAddressText.getText().toString();
+                String password = passwordText.getText().toString();
+                hideKeyboard(view);
+                login(emailAddress, password, view);
+                return true;
+            }
+            return handled;
+        });
     }
 
     private void login(String emailAddress, String password, View view){
         userViewModel.login(emailAddress, password);
         userViewModel.getLoginResult().observe(getViewLifecycleOwner(), result ->{
-            if (result.equals("SUCCESS")){
+            if (result.getResponseCode().equals(GenericResponse.ResponseCode.SUCCESSFUL)) {
                 savedStateHandle.set(LOGIN_SUCCESSFUL, true);
+                Snackbar.make(view, result.getResponseMessage(), Snackbar.LENGTH_SHORT).show();
                 NavHostFragment.findNavController(this).popBackStack();
             } else {
-                Snackbar.make(view, "Cannot Login", Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(view, result.getResponseMessage(), Snackbar.LENGTH_SHORT).show();
             }
         });
     }

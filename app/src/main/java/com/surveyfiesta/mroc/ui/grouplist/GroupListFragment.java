@@ -39,7 +39,6 @@ public class GroupListFragment extends Fragment implements ChatGroupListener {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        setHasOptionsMenu(true);
         return inflater.inflate(R.layout.group_list_fragment, container, false);
     }
 

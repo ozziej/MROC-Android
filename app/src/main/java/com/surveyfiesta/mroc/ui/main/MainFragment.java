@@ -21,7 +21,6 @@ import com.surveyfiesta.mroc.ui.login.UserViewModel;
 
 public class MainFragment extends Fragment {
 
-    private MainViewModel mViewModel;
     private UserViewModel userViewModel;
 
     public static MainFragment newInstance() {
@@ -38,13 +37,10 @@ public class MainFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         final NavController navController = Navigation.findNavController(view);
-        TextView currentUserEmail = this.getView().findViewById(R.id.currentUserEmailAddress);
 
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
         userViewModel.getCurrentUserData().observe(getViewLifecycleOwner(), user -> {
-            if (user != null) {
-                currentUserEmail.setText(user.getEmailAddress());
-            } else {
+            if (user == null) {
                 navController.navigate(R.id.loginFragment);
             }
         });

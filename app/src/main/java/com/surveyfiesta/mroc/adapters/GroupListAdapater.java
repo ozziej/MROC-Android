@@ -60,9 +60,7 @@ public class GroupListAdapater extends RecyclerView.Adapter<GroupListAdapater.Gr
         holder.groupNameText.setText(selectedGroup.getGroupName());
         holder.groupDescriptionText.setText(selectedGroup.getGroupDescription());
 
-        holder.itemView.setOnClickListener(view -> {
-            listener.chatGroupListener(view, holder.getAbsoluteAdapterPosition());
-        });
+        holder.itemView.setOnClickListener(view -> listener.chatGroupListener(view, holder.getAbsoluteAdapterPosition()));
     }
 
     public List<GroupChat> getGroupList() {

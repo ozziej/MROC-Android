@@ -1,46 +1,56 @@
 package com.surveyfiesta.mroc.entities;
 
 public class GenericResponse {
-    private final ResponseCode responseCode;
-    private final String responseMessage;
-    private final RequestCode requestCode;
-    private final String itemIdentifier;
+    private ResponseCode responseCode;
+    private String responseMessage;
+    private RequestCode requestCode;
 
-    public enum ResponseCode{
+    public enum ResponseCode {
         ERROR,
         SUCCESSFUL,
         NO_RESPONSE
     }
 
-    public enum RequestCode{
+    public enum RequestCode {
         OTHER,
         IMAGE,
         COMPANY,
         USER,
         SURVEY,
-        PRODUCT
+        PRODUCT,
+        CHAT;
     }
 
-    public GenericResponse(ResponseCode responseCode, String responseMessage, RequestCode requestCode, String itemIdentifier) {
+    public GenericResponse() {
+    }
+
+    public GenericResponse(ResponseCode responseCode, String responseMessage, RequestCode requestCode) {
         this.responseCode = responseCode;
         this.responseMessage = responseMessage;
         this.requestCode = requestCode;
-        this.itemIdentifier = itemIdentifier;
     }
 
     public ResponseCode getResponseCode() {
         return responseCode;
     }
 
+    public void setResponseCode(ResponseCode responseCode) {
+        this.responseCode = responseCode;
+    }
+
     public String getResponseMessage() {
         return responseMessage;
+    }
+
+    public void setResponseMessage(String responseMessage) {
+        this.responseMessage = responseMessage;
     }
 
     public RequestCode getRequestCode() {
         return requestCode;
     }
 
-    public String getItemIdentifier() {
-        return itemIdentifier;
+    public void setRequestCode(RequestCode requestCode) {
+        this.requestCode = requestCode;
     }
 }

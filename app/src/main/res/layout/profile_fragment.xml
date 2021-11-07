@@ -12,8 +12,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="64dp"
-        android:text="First Name"
+        android:layout_marginTop="32dp"
+        android:text="@string/first_name"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -21,17 +21,74 @@
         android:id="@+id/surnameTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Surname"
+        android:layout_marginTop="32dp"
+        android:text="@string/surname"
         app:layout_constraintStart_toStartOf="@+id/firstNameText"
-        app:layout_constraintTop_toBottomOf="@+id/firstNameText" />
+        app:layout_constraintTop_toBottomOf="@+id/firstNameEditText" />
+
+    <TextView
+        android:id="@+id/cellNumberText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="@string/cell_number"
+        app:layout_constraintStart_toStartOf="@+id/profileEmailTextView"
+        app:layout_constraintTop_toBottomOf="@+id/emailAddressEditText" />
 
     <TextView
         android:id="@+id/profileEmailTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Email Address"
+        android:layout_marginTop="32dp"
+        android:text="@string/email_address"
+        app:layout_constraintStart_toStartOf="@+id/surnameTextView"
+        app:layout_constraintTop_toBottomOf="@+id/surnameEditText" />
+
+    <EditText
+        android:id="@+id/emailAddressEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:ems="10"
+        android:hint="@string/email_address"
+        android:inputType="textEmailAddress"
+        android:minHeight="48dp"
+        app:layout_constraintStart_toStartOf="@+id/profileEmailTextView"
+        app:layout_constraintTop_toBottomOf="@+id/profileEmailTextView" />
+
+    <EditText
+        android:id="@+id/firstNameEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:ems="10"
+        android:hint="@string/first_name"
+        android:inputType="textPersonName"
+        android:minHeight="48dp"
+        app:layout_constraintStart_toStartOf="@+id/firstNameText"
+        app:layout_constraintTop_toBottomOf="@+id/firstNameText" />
+
+    <EditText
+        android:id="@+id/surnameEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:ems="10"
+        android:hint="@string/surname"
+        android:inputType="textPersonName"
+        android:minHeight="48dp"
         app:layout_constraintStart_toStartOf="@+id/surnameTextView"
         app:layout_constraintTop_toBottomOf="@+id/surnameTextView" />
+
+    <EditText
+        android:id="@+id/cellNumberEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:ems="10"
+        android:hint="@string/cell_number"
+        android:inputType="phone"
+        android:minHeight="48dp"
+        app:layout_constraintStart_toStartOf="@+id/cellNumberText"
+        app:layout_constraintTop_toBottomOf="@+id/cellNumberText" />
 </androidx.constraintlayout.widget.ConstraintLayout>

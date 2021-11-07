@@ -1,6 +1,7 @@
 package com.surveyfiesta.mroc;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.SavedStateHandle;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavBackStackEntry;
@@ -19,24 +20,18 @@ import com.surveyfiesta.mroc.ui.login.LoginFragment;
 import com.surveyfiesta.mroc.ui.login.UserViewModel;
 
 public class MainActivity extends AppCompatActivity {
-    private GroupListViewModel groupListViewModel;
-    private UserViewModel userViewModel;
+
+    private AppBarConfiguration appBarConfiguration;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.profileFragment,
-                R.id.groupListFragment
-        ).build();
-
-        userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
-        groupListViewModel = new ViewModelProvider(this).get(GroupListViewModel.class);
 
         BottomNavigationView navigationView = findViewById(R.id.bottom_navigation_view);
         NavHostFragment navHostFragment = (NavHostFragment)getSupportFragmentManager().findFragmentById(R.id.fragmentContainerView);
         NavController navController = navHostFragment.getNavController();
+        appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
 
@@ -53,5 +48,12 @@ public class MainActivity extends AppCompatActivity {
                         navController.navigate(startDestination, null, navOptions);
                     }
                 });
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        NavController navController = Navigation.findNavController(this, R.id.fragmentContainerView);
+        return NavigationUI.navigateUp(navController, appBarConfiguration)
+                || super.onSupportNavigateUp();
     }
 }
