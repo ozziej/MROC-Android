@@ -5,6 +5,7 @@ import android.util.Log;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.surveyfiesta.mroc.constants.DefaultValues;
@@ -14,7 +15,14 @@ import com.surveyfiesta.mroc.entities.UserResponse;
 import com.surveyfiesta.mroc.entities.Users;
 import com.surveyfiesta.mroc.interfaces.UserService;
 
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
+import okhttp3.RequestBody;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -33,18 +41,29 @@ public class UserViewModel extends ViewModel {
         this.currentUserData.setValue(null);
     }
 
-    public void login (String emailAddress, String password){
+    public void login (Integer userId) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(DefaultValues.BASE_USERS_URL)
+                .addConverterFactory(JacksonConverterFactory.create())
+                .build();
+        Map<String, Integer> userMap = new HashMap<>();
+        userMap.put("userId", userId);
+        RequestBody body = RequestBody.create(new JSONObject(userMap).toString(), MediaType.parse("application/json; charset=utf-8"));
+        UserService service = retrofit.create(UserService.class);
+        loginUser(service.loginUser(body));
+    }
+
+    public void login (String emailAddress, String password) {
         UserLoginRequest request = new UserLoginRequest(emailAddress, password);
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(DefaultValues.BASE_USERS_URL)
                 .addConverterFactory(JacksonConverterFactory.create())
                 .build();
-
-        objectMapper.findAndRegisterModules();
-        objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-
         UserService service = retrofit.create(UserService.class);
-        Call<UserResponse> call = service.loginUser(request);
+        loginUser(service.loginUser(request));
+    }
+
+    private void loginUser(Call<UserResponse> call) {
         call.enqueue(new Callback<UserResponse>() {
             @Override
             public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
@@ -113,6 +132,10 @@ public class UserViewModel extends ViewModel {
 
     public MutableLiveData<Users> getCurrentUserData() {
         return currentUserData;
+    }
+
+    public void setCurrentUserData(Users user){
+        currentUserData.postValue(user);
     }
 
     public MutableLiveData<UserResponse> getLoginResult() {

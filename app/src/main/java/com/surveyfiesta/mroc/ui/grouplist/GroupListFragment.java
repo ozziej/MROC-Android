@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -18,10 +19,12 @@ import android.view.ViewGroup;
 import com.google.android.material.snackbar.Snackbar;
 import com.surveyfiesta.mroc.R;
 import com.surveyfiesta.mroc.adapters.GroupListAdapater;
+import com.surveyfiesta.mroc.entities.GenericResponse;
 import com.surveyfiesta.mroc.entities.GroupChat;
 import com.surveyfiesta.mroc.entities.Users;
 import com.surveyfiesta.mroc.interfaces.ChatGroupListener;
 import com.surveyfiesta.mroc.ui.login.UserViewModel;
+import com.surveyfiesta.mroc.viewmodels.SavedStateViewModel;
 
 import java.util.ArrayList;
 
@@ -30,11 +33,9 @@ public class GroupListFragment extends Fragment implements ChatGroupListener {
 
     private GroupListViewModel groupListViewModel;
     private GroupListAdapater groupListAdapater;
-    private Users currentUser;
 
-    public static GroupListFragment newInstance() {
-        return new GroupListFragment();
-    }
+    private UserViewModel userViewModel;
+    private SavedStateViewModel stateViewModel;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -46,25 +47,50 @@ public class GroupListFragment extends Fragment implements ChatGroupListener {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         groupListViewModel = new ViewModelProvider(requireActivity()).get(GroupListViewModel.class);
-        UserViewModel userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
-        currentUser = userViewModel.getCurrentUserData().getValue();
-        if (currentUser != null) {
-            recyclerView = view.findViewById(R.id.groupListRecycler);
-            groupListAdapater = new GroupListAdapater(new ArrayList<>(), getContext(), this::chatGroupListener);
-            recyclerView.setAdapter(groupListAdapater);
+        userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
+        stateViewModel = new ViewModelProvider(requireActivity()).get(SavedStateViewModel.class);
+        final NavController navController = Navigation.findNavController(view);
+        Users currentUser = userViewModel.getCurrentUserData().getValue();
 
-            recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-            recyclerView.setHasFixedSize(true);
-
-            groupListViewModel.findUserChats(currentUser);
-
-            groupListViewModel.getGroupChatData().observe(getViewLifecycleOwner(), groupChatList -> {
-                if (groupChatList != null) {
-                    groupListAdapater = new GroupListAdapater(groupChatList, getContext(), this::chatGroupListener);
-                    recyclerView.setAdapter(groupListAdapater);
-                }
-            });
+        Integer userId = stateViewModel.getCurrentUserId().getValue();
+        if (userId == null) {
+            navController.navigate(R.id.loginFragment);
+        } else {
+            if (currentUser == null) {
+                loginUser(userId, view);
+            } else {
+                drawList(currentUser, view);
+            }
         }
+    }
+
+    private void loginUser(Integer userId, @NonNull View view) {
+        userViewModel.login(userId);
+        userViewModel.getLoginResult().observe(getViewLifecycleOwner(), result -> {
+            if (!result.getResponseCode().equals(GenericResponse.ResponseCode.SUCCESSFUL)) {
+                Snackbar.make(view, result.getResponseMessage(), Snackbar.LENGTH_SHORT).show();
+            } else {
+                drawList(result.getUser(), view);
+            }
+        });
+    }
+
+    private void drawList(Users currentUser, @NonNull View view){
+        recyclerView = view.findViewById(R.id.groupListRecycler);
+        groupListAdapater = new GroupListAdapater(new ArrayList<>(), getContext(), this::chatGroupListener);
+        recyclerView.setAdapter(groupListAdapater);
+
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setHasFixedSize(true);
+
+        groupListViewModel.findUserChats(currentUser);
+
+        groupListViewModel.getGroupChatData().observe(getViewLifecycleOwner(), groupChatList -> {
+            if (groupChatList != null) {
+                groupListAdapater = new GroupListAdapater(groupChatList, getContext(), this::chatGroupListener);
+                recyclerView.setAdapter(groupListAdapater);
+            }
+        });
     }
 
     @Override
@@ -75,7 +101,7 @@ public class GroupListFragment extends Fragment implements ChatGroupListener {
         if (groupChat != null) {
             Navigation.findNavController(view).navigate(R.id.action_groupListFragment_to_groupChatFragment);
         } else {
-            Snackbar.make(view, "Nothing Selected!", Snackbar.LENGTH_SHORT);
+            Snackbar.make(view, "Nothing Selected!", Snackbar.LENGTH_SHORT).show();
         }
     }
 }

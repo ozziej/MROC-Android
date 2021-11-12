@@ -18,10 +18,12 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.surveyfiesta.mroc.ui.grouplist.GroupListViewModel;
 import com.surveyfiesta.mroc.ui.login.LoginFragment;
 import com.surveyfiesta.mroc.ui.login.UserViewModel;
+import com.surveyfiesta.mroc.viewmodels.SavedStateViewModel;
 
 public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration appBarConfiguration;
+    private SavedStateViewModel stateViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,18 +38,17 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupWithNavController(navigationView, navController);
 
         NavBackStackEntry navBackStackEntry = navController.getCurrentBackStackEntry();
-        SavedStateHandle savedStateHandle = navBackStackEntry.getSavedStateHandle();
+        stateViewModel = new ViewModelProvider(this).get(SavedStateViewModel.class);
 
-        savedStateHandle.getLiveData(LoginFragment.LOGIN_SUCCESSFUL)
-                .observe(navBackStackEntry, success -> {
-                    if (!(Boolean)success){
-                        int startDestination = navController.getGraph().getStartDestination();
-                        NavOptions navOptions = new NavOptions.Builder()
-                                .setPopUpTo(startDestination, true)
-                                .build();
-                        navController.navigate(startDestination, null, navOptions);
-                    }
-                });
+        Integer userId = stateViewModel.getCurrentUserId().getValue();
+        if (userId == null) {
+            int startDestination = navController.getGraph().getStartDestination();
+            NavOptions navOptions = new NavOptions.Builder()
+                    .setPopUpTo(startDestination, true)
+                    .build();
+            navController.navigate(startDestination, null, navOptions);
+        }
+
     }
 
     @Override
