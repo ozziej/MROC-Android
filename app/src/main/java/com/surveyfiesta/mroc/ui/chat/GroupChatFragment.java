@@ -99,7 +99,10 @@ public class GroupChatFragment extends Fragment {
         });
 
         chatLayout.removeAllViews();
-        startWebSocket();
+        if (groupChat != null && currentUser != null) {
+            webSocketViewModel.initWebSocket(groupChat, currentUser);
+            webSocketViewModel.getNotificationLiveData().observe(getViewLifecycleOwner(), this::onChanged);
+        }
         getInitialMessages();
     }
 
@@ -108,13 +111,6 @@ public class GroupChatFragment extends Fragment {
                 ",\"userId\":"+userId+
                 ",\"messageBody\":\""+messageBody+"\"}";
         return jsonText;
-    }
-
-    private void startWebSocket() {
-        if (groupChat != null && currentUser != null) {
-            webSocketViewModel.initWebSocket(groupChat, currentUser);
-            webSocketViewModel.getNotificationLiveData().observe(getViewLifecycleOwner(), this::onChanged);
-        }
     }
 
     private void onChanged(InstantNotification notification) {

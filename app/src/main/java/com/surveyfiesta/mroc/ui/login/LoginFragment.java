@@ -30,10 +30,6 @@ public class LoginFragment extends Fragment {
     private UserViewModel userViewModel;
     private SavedStateViewModel stateViewModel;
 
-    public static LoginFragment newInstance() {
-        return new LoginFragment();
-    }
-
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
@@ -54,7 +50,7 @@ public class LoginFragment extends Fragment {
             String emailAddress = emailAddressText.getText().toString();
             String password = passwordText.getText().toString();
             hideKeyboard(view);
-            login(emailAddress, password, view);
+            userViewModel.login(emailAddress, password);
         });
 
         passwordText.setOnEditorActionListener((textView, i, keyEvent) -> {
@@ -63,15 +59,12 @@ public class LoginFragment extends Fragment {
                 String emailAddress = emailAddressText.getText().toString();
                 String password = passwordText.getText().toString();
                 hideKeyboard(view);
-                login(emailAddress, password, view);
-                return true;
+                userViewModel.login(emailAddress, password);
+                handled = true;
             }
             return handled;
         });
-    }
 
-    private void login(String emailAddress, String password, View view) {
-        userViewModel.login(emailAddress, password);
         userViewModel.getLoginResult().observe(getViewLifecycleOwner(), result ->{
             if (result.getResponseCode().equals(GenericResponse.ResponseCode.SUCCESSFUL)) {
                 stateViewModel.setCurrentUserId(result.getUser().getUserId());

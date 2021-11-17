@@ -85,6 +85,8 @@ public class WebSocketViewModel extends ViewModel {
     }
 
     public void closeSocket() {
-        webSocket.close(1000,"Hide Chat");
+        if (webSocket != null) {
+            webSocket.close(1000, "Hide Chat");
+        }
     }
 }

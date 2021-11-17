@@ -10,9 +10,7 @@ public class GroupChat {
     public GroupChat() {
     }
 
-    public GroupChat(String groupUuid, Integer groupId, String groupName, String groupDescription, String groupImageUrl) {
-        this.groupUuid = groupUuid;
-        this.groupId = groupId;
+    public GroupChat(String groupName, String groupDescription, String groupImageUrl) {
         this.groupName = groupName;
         this.groupDescription = groupDescription;
         this.groupImageUrl = groupImageUrl;

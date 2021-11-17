@@ -25,6 +25,8 @@ public class GroupListAdapater extends RecyclerView.Adapter<GroupListAdapater.Gr
     private static ChatGroupListener listener;
     private List<GroupChat> groupList = new ArrayList<>();
     private Context context;
+    private GroupChat deletedGroupChat = null;
+    private int deletedItemPosition = 0;
 
     public GroupListAdapater(List<GroupChat> groupList, Context context, ChatGroupListener listener) {
         this.groupList = groupList;
@@ -67,6 +69,16 @@ public class GroupListAdapater extends RecyclerView.Adapter<GroupListAdapater.Gr
         return groupList;
     }
 
+    public Context getContext() {
+        return context;
+    }
+
+    public void deleteItem(int position) {
+        deletedGroupChat = groupList.get(position);
+        deletedItemPosition = position;
+        groupList.remove(deletedGroupChat);
+    }
+
     @Override
     public int getItemCount() {
         return groupList.size();
@@ -85,6 +97,7 @@ public class GroupListAdapater extends RecyclerView.Adapter<GroupListAdapater.Gr
             itemView.setClickable(true);
         }
     }
+
 }
 
 

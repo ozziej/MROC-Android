@@ -21,6 +21,12 @@ public class GenericResponse {
         CHAT;
     }
 
+    public enum RequestTypes {
+        LEAVE_GROUP,
+        CREATE_GROUP,
+        ADD_USER
+    }
+
     public GenericResponse() {
     }
 
