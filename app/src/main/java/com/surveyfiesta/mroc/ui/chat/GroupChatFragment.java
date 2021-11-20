@@ -138,20 +138,18 @@ public class GroupChatFragment extends Fragment {
             groupChatViewModel.findGroupChatMessages(groupChat);
             groupChatViewModel.getNotificationLiveDate().observe(getViewLifecycleOwner(), instantNotifications -> {
                 AtomicInteger previousDays = new AtomicInteger(0);
-                instantNotifications.forEach(i ->{
-                    Long days = ChronoUnit.DAYS.between(i.getDateTime(), LocalDateTime.now());
-
-                    if (days > 0 && previousDays.getAndSet(days.intValue()) != days) {
-                        drawDayBubble(dateFormatter.format(i.getDateTime()));
-                    }
-
-                    if (days == 0 && previousDays.getAndSet(days.intValue()) != days){
-                        drawDayBubble("Today");
-                    }
-
-                    addMessageBox(i);
-                    Log.d("MESSAGE : ",i.getNotificationUuid());
-                });
+                if (instantNotifications != null) {
+                    instantNotifications.forEach(i -> {
+                        Long days = ChronoUnit.DAYS.between(i.getDateTime(), LocalDateTime.now());
+                        if (days > 0 && previousDays.getAndSet(days.intValue()) != days) {
+                            drawDayBubble(dateFormatter.format(i.getDateTime()));
+                        }
+                        if (days == 0 && previousDays.getAndSet(days.intValue()) != days) {
+                            drawDayBubble("Today");
+                        }
+                        addMessageBox(i);
+                    });
+                }
             });
         }
     }

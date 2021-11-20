@@ -13,11 +13,13 @@
     <string name="cell_number">Cell Number</string>
 
     <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="share">Share</string>
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
     <string name="create">Create</string>
     <string name="new_group">New Group</string>
-    <string name="create_new_group">Create New Group</string>
+    <string name="edit_group">Edit Group</string>
     <string name="title">Title</string>
     <string name="description">Description</string>
 

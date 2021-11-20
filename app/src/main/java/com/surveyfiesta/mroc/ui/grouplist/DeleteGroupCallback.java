@@ -4,7 +4,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -13,18 +12,18 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.surveyfiesta.mroc.R;
-import com.surveyfiesta.mroc.adapters.GroupListAdapater;
+import com.surveyfiesta.mroc.adapters.GroupListAdapter;
 
 public class DeleteGroupCallback extends ItemTouchHelper.SimpleCallback {
 
-    private GroupListAdapater listAdapater;
+    private GroupListAdapter listAdapter;
     private Drawable icon;
     private final ColorDrawable background = new ColorDrawable(Color.RED);
 
-    public DeleteGroupCallback(GroupListAdapater adapater) {
+    public DeleteGroupCallback(GroupListAdapter adapter) {
         super(0, ItemTouchHelper.LEFT);
-        listAdapater = adapater;
-        icon = ContextCompat.getDrawable(listAdapater.getContext(), R.drawable.ic_baseline_delete_24);
+        listAdapter = adapter;
+        icon = ContextCompat.getDrawable(listAdapter.getContext(), R.drawable.ic_baseline_more_24);
     }
 
     @Override
@@ -35,9 +34,8 @@ public class DeleteGroupCallback extends ItemTouchHelper.SimpleCallback {
     @Override
     public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
         int position = viewHolder.getAbsoluteAdapterPosition();
-        if (listAdapater != null && !listAdapater.getGroupList().isEmpty()) {
-            listAdapater.deleteItem(position);
-            listAdapater.notifyItemRemoved(position);
+        if (listAdapter != null && !listAdapter.getGroupList().isEmpty()) {
+            listAdapter.showMenu(position);
         }
     }
 

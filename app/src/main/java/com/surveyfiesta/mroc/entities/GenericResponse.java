@@ -23,7 +23,8 @@ public class GenericResponse {
 
     public enum RequestTypes {
         LEAVE_GROUP,
-        CREATE_GROUP,
+        NEW_GROUP,
+        EDIT_GROUP,
         ADD_USER
     }
 

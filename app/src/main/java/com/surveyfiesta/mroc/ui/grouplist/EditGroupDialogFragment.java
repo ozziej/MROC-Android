@@ -15,6 +15,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 import com.surveyfiesta.mroc.R;
+import com.surveyfiesta.mroc.entities.GroupChat;
+import com.surveyfiesta.mroc.entities.UserGroupChatEntity;
 import com.surveyfiesta.mroc.interfaces.EditGroupDialogListener;
 
 public class EditGroupDialogFragment extends DialogFragment implements TextWatcher {
@@ -23,7 +25,10 @@ public class EditGroupDialogFragment extends DialogFragment implements TextWatch
     private EditText editGroupTitleText;
     private EditText editGroupDescriptionText;
 
-    public EditGroupDialogFragment() {
+    private UserGroupChatEntity chatEntity;
+
+    public EditGroupDialogFragment(UserGroupChatEntity chatEntity){
+        this.chatEntity = chatEntity;
     }
 
     @Override
@@ -48,18 +53,27 @@ public class EditGroupDialogFragment extends DialogFragment implements TextWatch
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = requireActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.new_group_dialog, null);
+        int positiveButtonString = R.string.create;
+        View view = inflater.inflate(R.layout.edit_group_dialog, null);
         editGroupTitleText = view.findViewById(R.id.editGroupTitle);
         editGroupTitleText.requestFocus();
         editGroupTitleText.addTextChangedListener(this);
         editGroupDescriptionText = view.findViewById(R.id.editGroupDescription);
+        editGroupDescriptionText.addTextChangedListener(this);
+
+        if (chatEntity.getGroupChat().getGroupId() > 0) {
+            positiveButtonString = R.string.save;
+        }
+        editGroupTitleText.setText(chatEntity.getGroupChat().getGroupName());
+        editGroupDescriptionText.setText(chatEntity.getGroupChat().getGroupDescription());
         builder.setView(view)
-                .setPositiveButton(R.string.create, (dialogInterface, i) -> {
+                .setPositiveButton(positiveButtonString, (dialogInterface, i) -> {
                     listener.onDialogPositiveClick(EditGroupDialogFragment.this, editGroupTitleText.getText().toString(), editGroupDescriptionText.getText().toString());
                 })
                 .setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
                     listener.onDialogNegativeClick(EditGroupDialogFragment.this);
                 });
+
         return builder.create();
     }
 
@@ -74,10 +88,18 @@ public class EditGroupDialogFragment extends DialogFragment implements TextWatch
     @Override
     public void afterTextChanged(Editable editable) {
         AlertDialog dialog = (AlertDialog) this.getDialog();
-        if (editable.length() > 0) {
-            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
-        } else {
-            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
+        boolean disabled = this.editGroupDescriptionText.getText().length() == 0
+                || this.editGroupTitleText.getText().length() == 0;
+        if (dialog != null) {
+            if (disabled) {
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
+            } else {
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
+            }
         }
+    }
+
+    public UserGroupChatEntity getChatEntity() {
+        return chatEntity;
     }
 }

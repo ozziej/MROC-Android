@@ -6,14 +6,11 @@ public class GroupChat {
     String groupName;
     String groupDescription;
     String groupImageUrl;
+    boolean groupEnabled;
 
     public GroupChat() {
-    }
-
-    public GroupChat(String groupName, String groupDescription, String groupImageUrl) {
-        this.groupName = groupName;
-        this.groupDescription = groupDescription;
-        this.groupImageUrl = groupImageUrl;
+        this.groupId = 0;
+        this.groupEnabled = true;
     }
 
     public String getGroupUuid() {
@@ -54,5 +51,13 @@ public class GroupChat {
 
     public void setGroupImageUrl(String groupImageUrl) {
         this.groupImageUrl = groupImageUrl;
+    }
+
+    public boolean isGroupEnabled() {
+        return groupEnabled;
+    }
+
+    public void setGroupEnabled(boolean groupEnabled) {
+        this.groupEnabled = groupEnabled;
     }
 }
