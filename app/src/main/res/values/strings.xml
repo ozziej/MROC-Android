@@ -18,6 +18,8 @@
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
     <string name="create">Create</string>
+    <string name="undo">Undo</string>
+    <string name="leave">Leave</string>
     <string name="new_group">New Group</string>
     <string name="edit_group">Edit Group</string>
     <string name="title">Title</string>

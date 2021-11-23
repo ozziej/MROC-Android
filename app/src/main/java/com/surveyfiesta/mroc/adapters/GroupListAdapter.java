@@ -27,7 +27,6 @@ public class GroupListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     private List<GroupChatRecyclerEntity> groupList ;
     private Context context;
     private GroupChatRecyclerEntity deletedGroupChat = null;
-    private int deletedItemPosition = 0;
     private final int SHOW_MENU = 1;
     private final int HIDE_MENU = 2;
 
@@ -40,14 +39,8 @@ public class GroupListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view ;
-        if (viewType == SHOW_MENU) {
-            view = LayoutInflater.from(context).inflate(R.layout.group_list_item_menu, parent, false);
-            return new GroupViewMenuHolder(view);
-        } else {
-            view = LayoutInflater.from(context).inflate(R.layout.group_list_item, parent, false);
-            return new GroupViewHolder(view);
-        }
+        View view = LayoutInflater.from(context).inflate(R.layout.group_list_item, parent, false);
+        return new GroupViewHolder(view);
     }
 
     @Override
@@ -73,13 +66,7 @@ public class GroupListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             groupViewHolder.groupNameText.setText(selectedGroup.getGroupName());
             groupViewHolder.groupDescriptionText.setText(selectedGroup.getGroupDescription());
 
-            groupViewHolder.itemView.setOnClickListener(view -> listener.chatGroupListener(view, holder.getAbsoluteAdapterPosition(), ChatGroupButtonType.CLICK));
-        } else if (holder instanceof GroupViewMenuHolder) {
-            GroupViewMenuHolder groupViewMenuHolder = (GroupViewMenuHolder)holder;
-            groupViewMenuHolder.shareButton.setOnClickListener(view -> listener.chatGroupListener(view, holder.getAbsoluteAdapterPosition(), ChatGroupButtonType.SHARE));
-            groupViewMenuHolder.editButton.setOnClickListener(view -> listener.chatGroupListener(view, holder.getAbsoluteAdapterPosition(), ChatGroupButtonType.EDIT));
-            groupViewMenuHolder.deleteButton.setOnClickListener(view -> listener.chatGroupListener(view, holder.getAbsoluteAdapterPosition(), ChatGroupButtonType.DELETE));
-            groupViewMenuHolder.itemView.setOnClickListener(view -> closeMenu());
+            groupViewHolder.itemView.setOnClickListener(view -> listener.chatGroupListener(holder.getAbsoluteAdapterPosition()));
         }
     }
 
@@ -121,9 +108,16 @@ public class GroupListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     public void deleteItem(int position) {
         deletedGroupChat = groupList.get(position);
-        deletedItemPosition = position;
         groupList.remove(deletedGroupChat);
         notifyItemRemoved(position);
+    }
+
+    public void undoDeleteItem(int position) {
+        if (deletedGroupChat != null){
+            groupList.add(position, deletedGroupChat);
+            notifyItemChanged(position);
+            deletedGroupChat = null;
+        }
     }
 
     public void clear() {
