@@ -4,7 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -12,7 +12,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.squareup.picasso.Picasso;
-import com.surveyfiesta.mroc.constants.ChatGroupButtonType;
 import com.surveyfiesta.mroc.constants.DefaultValues;
 import com.surveyfiesta.mroc.entities.GroupChat;
 import com.surveyfiesta.mroc.R;
@@ -27,8 +26,6 @@ public class GroupListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     private List<GroupChatRecyclerEntity> groupList ;
     private Context context;
     private GroupChatRecyclerEntity deletedGroupChat = null;
-    private final int SHOW_MENU = 1;
-    private final int HIDE_MENU = 2;
 
     public GroupListAdapter(List<GroupChatRecyclerEntity> groupList, Context context, ChatGroupListener listener) {
         this.groupList = groupList;
@@ -65,33 +62,9 @@ public class GroupListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
             groupViewHolder.groupNameText.setText(selectedGroup.getGroupName());
             groupViewHolder.groupDescriptionText.setText(selectedGroup.getGroupDescription());
-
-            groupViewHolder.itemView.setOnClickListener(view -> listener.chatGroupListener(holder.getAbsoluteAdapterPosition()));
+            groupViewHolder.moreButton.setOnClickListener(view -> listener.onButtonClickListener(view, holder.getAbsoluteAdapterPosition()));
+            groupViewHolder.itemView.setOnClickListener(view -> listener.onRowClickListener(view, holder.getAbsoluteAdapterPosition()));
         }
-    }
-
-    @Override
-    public int getItemViewType(int position) {
-        if (groupList.get(position).isMenuVisible()){
-            return SHOW_MENU;
-        } else {
-            return HIDE_MENU;
-        }
-    }
-
-    public void showMenu(int position) {
-        groupList.forEach(i -> i.setMenuVisible(false));
-        groupList.get(position).setMenuVisible(true);
-        notifyDataSetChanged();
-    }
-
-    public boolean isMenuShown() {
-        return groupList.stream().anyMatch(i -> i.isMenuVisible());
-    }
-
-    public void closeMenu() {
-        groupList.forEach(i -> i.setMenuVisible(false));
-        notifyDataSetChanged();
     }
 
     public List<GroupChatRecyclerEntity> getGroupList() {
@@ -134,26 +107,15 @@ public class GroupListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         TextView groupNameText;
         TextView groupDescriptionText;
         ImageView groupImage;
+        ImageButton moreButton;
 
         public GroupViewHolder(@NonNull View itemView) {
             super(itemView);
             this.groupImage = itemView.findViewById(R.id.groupImage);
             this.groupDescriptionText = itemView.findViewById(R.id.groupDescriptionText);
             this.groupNameText = itemView.findViewById(R.id.groupNameText);
-            itemView.setClickable(true);
-        }
-    }
+            this.moreButton = itemView.findViewById(R.id.groupMoreButton);
 
-    public class GroupViewMenuHolder extends RecyclerView.ViewHolder {
-        Button editButton;
-        Button shareButton;
-        Button deleteButton;
-
-        public GroupViewMenuHolder(@NonNull View itemView) {
-            super(itemView);
-            this.deleteButton = itemView.findViewById(R.id.buttonDeleteGroup);
-            this.editButton = itemView.findViewById(R.id.buttonEditGroup);
-            this.shareButton = itemView.findViewById(R.id.buttonShareGroup);
             itemView.setClickable(true);
         }
     }

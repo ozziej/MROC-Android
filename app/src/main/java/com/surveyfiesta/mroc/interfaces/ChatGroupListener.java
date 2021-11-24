@@ -5,5 +5,6 @@ import android.view.View;
 import com.surveyfiesta.mroc.constants.ChatGroupButtonType;
 
 public interface ChatGroupListener {
-    void chatGroupListener(int position);
+    void onRowClickListener(View view, int position);
+    void onButtonClickListener(View view, int position);
 }

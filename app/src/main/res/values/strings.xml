@@ -26,4 +26,5 @@
     <string name="description">Description</string>
 
     <string name="title_description_needed">Please enter something for title and description</string>
+    <string name="more">More</string>
 </resources>

@@ -1,7 +1,6 @@
 package com.surveyfiesta.mroc.ui.grouplist;
 
 import android.content.DialogInterface;
-import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -17,7 +16,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -34,18 +32,19 @@ import com.surveyfiesta.mroc.entities.GroupChatRecyclerEntity;
 import com.surveyfiesta.mroc.entities.GroupUsers;
 import com.surveyfiesta.mroc.entities.UserGroupChatEntity;
 import com.surveyfiesta.mroc.entities.Users;
-import com.surveyfiesta.mroc.helpers.SwipeHelper;
+import com.surveyfiesta.mroc.helpers.EditMenuCallback;
 import com.surveyfiesta.mroc.interfaces.ChatGroupListener;
 import com.surveyfiesta.mroc.interfaces.EditGroupDialogListener;
+import com.surveyfiesta.mroc.interfaces.EditMenuActionItemListener;
 import com.surveyfiesta.mroc.ui.login.UserViewModel;
 import com.surveyfiesta.mroc.viewmodels.SavedStateViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class GroupListFragment extends Fragment implements ChatGroupListener, EditGroupDialogListener {
+public class GroupListFragment extends Fragment implements ChatGroupListener, EditGroupDialogListener, EditMenuActionItemListener {
     private RecyclerView recyclerView;
-    SwipeHelper swipeHelper;
+
     private SwipeRefreshLayout swipeGroupContainer;
     private GroupListViewModel groupListViewModel;
     private GroupListAdapter groupListAdapter;
@@ -54,6 +53,7 @@ public class GroupListFragment extends Fragment implements ChatGroupListener, Ed
 
     private UserViewModel userViewModel;
     private SavedStateViewModel stateViewModel;
+    private EditMenuCallback callback;
 
     private Users currentUser;
 
@@ -99,47 +99,14 @@ public class GroupListFragment extends Fragment implements ChatGroupListener, Ed
                 List<GroupChatRecyclerEntity> list = new ArrayList<>();
                 groupChatList.forEach(i -> list.add(new GroupChatRecyclerEntity(i)));
                 if (groupListAdapter == null) {
-                    groupListAdapter = new GroupListAdapter(list, getContext(), this::chatGroupListener);
+                    groupListAdapter = new GroupListAdapter(list, getContext(), this);
                 } else {
                     groupListAdapter.setGroupList(list);
                 }
                 recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
                 recyclerView.setHasFixedSize(true);
                 recyclerView.setAdapter(groupListAdapter);
-                swipeHelper = new SwipeHelper(getContext(), recyclerView, 250) {
-                    @Override
-                    public void instantiateSwipeButton(RecyclerView.ViewHolder viewHolder, List<SwipeMenuButton> buffer) {
-                        buffer.add(new SwipeMenuButton(getContext(), R.drawable.ic_baseline_delete_24, Color.RED,
-                                new ChatGroupListener() {
-                                    @Override
-                                    public void chatGroupListener(int position) {
-                                        confirmLeaveChat(position);
-                                    }
-                                }
-                        ));
 
-                        buffer.add(new SwipeMenuButton(getContext(), R.drawable.ic_baseline_edit_24, Color.GREEN,
-                                new ChatGroupListener() {
-                                    @Override
-                                    public void chatGroupListener(int position) {
-                                        UserGroupChatEntity chatEntity = groupListAdapter.getGroupList().get(position).getChatEntity();
-                                        GroupChat groupChat = chatEntity.getGroupChat();
-                                        groupListViewModel.setSelectedChatData(groupChat);
-                                        showEditGroupDialog(chatEntity);
-                                    }
-                                }
-                        ));
-
-                        buffer.add(new SwipeMenuButton(getContext(), R.drawable.ic_baseline_share_24, Color.LTGRAY,
-                                new ChatGroupListener() {
-                                    @Override
-                                    public void chatGroupListener(int position) {
-                                        Log.i("BUTTON_CLICK:", "view :"+view+" pos: "+position+" SHARE");
-                                    }
-                                }
-                        ));
-                    }
-                };
                 swipeGroupContainer.setRefreshing(false);
             }
         });
@@ -154,6 +121,8 @@ public class GroupListFragment extends Fragment implements ChatGroupListener, Ed
                 android.R.color.holo_green_light,
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
+
+        callback = new EditMenuCallback(this::onActionItemClicked);
     }
 
     @Override
@@ -185,7 +154,8 @@ public class GroupListFragment extends Fragment implements ChatGroupListener, Ed
         dialogFragment.show(getChildFragmentManager(),"newGroupDialog");
     }
 
-    private void showEditGroupDialog(UserGroupChatEntity chatEntity) {
+    private void showEditGroupDialog(int position) {
+        UserGroupChatEntity chatEntity = groupListAdapter.getGroupList().get(position).getChatEntity();
         boolean adminUser = chatEntity.getGroupUsers().stream()
                 .filter(i-> i.getUserId().equals(currentUser.getUserId()))
                 .anyMatch(i-> i.isAdminUser());
@@ -198,12 +168,19 @@ public class GroupListFragment extends Fragment implements ChatGroupListener, Ed
     }
 
     @Override
-    public void chatGroupListener(int position) {
+    public void onRowClickListener(View view, int position) {
         UserGroupChatEntity chatEntity = groupListAdapter.getGroupList().get(position).getChatEntity();
         GroupChat groupChat = chatEntity.getGroupChat();
         groupListViewModel.setSelectedChatData(groupChat);
         Navigation.findNavController(getView()).navigate(R.id.action_groupListFragment_to_groupChatFragment);
     }
+
+    @Override
+    public void onButtonClickListener(View view, int position) {
+        callback.setRowPosition(position);
+        view.startActionMode(callback);
+    }
+
 
     @Override
     public void onDialogPositiveClick(DialogFragment dialog, String titleText, String descriptionText) {
@@ -258,4 +235,21 @@ public class GroupListFragment extends Fragment implements ChatGroupListener, Ed
         });
     }
 
+    @Override
+    public boolean onActionItemClicked(MenuItem item) {
+        int position = callback.getRowPosition();
+        switch (item.getItemId()) {
+            case R.id.button_edit_group:
+                showEditGroupDialog(position);
+                break;
+            case R.id.button_leave_group:
+                confirmLeaveChat(position);
+                break;
+            case R.id.button_share_group:
+                break;
+            default:
+                break;
+        }
+        return false;
+    }
 }
