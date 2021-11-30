@@ -8,9 +8,12 @@
     <string name="sf_logo">SurveyFiesta Logo</string>
 
     <string name="email_address">Email Address</string>
+    <string name="password">Password</string>
     <string name="first_name">First Name</string>
     <string name="surname">Surname</string>
     <string name="cell_number">Cell Number</string>
+    <string name="login">Login</string>
+    <string name="create_account">Create Account</string>
 
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>
@@ -27,4 +30,7 @@
 
     <string name="title_description_needed">Please enter something for title and description</string>
     <string name="more">More</string>
+    <string name="join">Join</string>
+    <string name="join_group">Join Group</string>
+    <string name="copied_link">Copied Link</string>
 </resources>

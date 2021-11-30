@@ -1,5 +1,7 @@
 package com.surveyfiesta.mroc.interfaces;
 
+import com.surveyfiesta.mroc.entities.GenericResponse;
+import com.surveyfiesta.mroc.entities.GroupUsers;
 import com.surveyfiesta.mroc.entities.UserLoginRequest;
 import com.surveyfiesta.mroc.entities.UserResponse;
 import com.surveyfiesta.mroc.entities.Users;
@@ -18,4 +20,8 @@ public interface UserService {
 
     @POST("update")
     Call<UserResponse> updateUser(@Body Users users);
+
+    @POST("updateNickname")
+    Call<GenericResponse> updateNickname(@Body GroupUsers groupUsers);
+
 }

@@ -1,7 +1,10 @@
 package com.surveyfiesta.mroc.ui.home;
 
+import static android.content.Context.INPUT_METHOD_SERVICE;
+
 import androidx.lifecycle.ViewModelProvider;
 
+import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -16,6 +19,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -62,12 +66,20 @@ public class ProfileFragment extends Fragment {
             navController.navigate(R.id.loginFragment);
         } else {
             Users user = userViewModel.getCurrentUserData().getValue();
-            if (user == null) {
+            if (user == null && !userId.equals(0)) {
                 loginUser(userId, view);
+            } else if (userId.equals(0)) {
+                createNewUser();
             } else {
                 displayUserDetails(user);
             }
         }
+    }
+
+    private void createNewUser() {
+        Users user = new Users();
+        displayUserDetails(user);
+        userViewModel.setCurrentUserData(user);
     }
 
     private void loginUser(Integer userId, @NonNull View view) {
@@ -106,12 +118,17 @@ public class ProfileFragment extends Fragment {
 
     private void updateWithResult() {
         Users user = userViewModel.getCurrentUserData().getValue();
+        hideKeyboard(getView());
         if (user != null) {
             updateUserModel(user);
             userViewModel.updateUserDetails();
             userViewModel.getUpdateResult().observe(getViewLifecycleOwner(), result ->{
                 Snackbar.make(this.getView(), result.getResponseMessage(), Snackbar.LENGTH_SHORT).show();
+                stateViewModel.setCurrentUserId(user.getUserId());
+                displayUserDetails(user);
             });
+        } else {
+            Snackbar.make(getView(), "Please Enter some detail", Snackbar.LENGTH_SHORT).show();
         }
     }
 
@@ -137,5 +154,11 @@ public class ProfileFragment extends Fragment {
         surnameView.setText(user.getSurname());
         emailAddress.setText(user.getEmailAddress());
         cellNumber.setText(user.getCellNumber());
+    }
+
+    private void hideKeyboard(View v) {
+        Context context = v.getContext();
+        InputMethodManager inputMethodManager = (InputMethodManager)context.getSystemService(INPUT_METHOD_SERVICE);
+        inputMethodManager.hideSoftInputFromWindow(v.getApplicationWindowToken(),0);
     }
 }

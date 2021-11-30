@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import com.surveyfiesta.mroc.constants.UserTypes;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -36,29 +37,31 @@ public class Users implements Serializable {
     private boolean receiveMarketing;
 
     public Users() {
+        this(0);
     }
 
-    public Users(Integer userId, String userPass, String userSalt, String idNumber, String title, String firstName, String surname, String otherName, String gender, String emailAddress, String countryCode, String city, String phoneNumber, String cellNumber, String postalAddress, LocalDateTime dateOfBirth, LocalDateTime firstRegistered, String userType, boolean paidParticipation, boolean receiveMarketing) {
+    public Users(Integer userId) {
+        LocalDateTime currentTime = LocalDateTime.now();
         this.userId = userId;
-        this.userPass = userPass;
-        this.userSalt = userSalt;
-        this.idNumber = idNumber;
-        this.title = title;
-        this.firstName = firstName;
-        this.surname = surname;
-        this.otherName = otherName;
-        this.gender = gender;
-        this.emailAddress = emailAddress;
-        this.countryCode = countryCode;
-        this.city = city;
-        this.phoneNumber = phoneNumber;
-        this.cellNumber = cellNumber;
-        this.postalAddress = postalAddress;
-        this.dateOfBirth = dateOfBirth;
-        this.firstRegistered = firstRegistered;
-        this.userType = userType;
-        this.paidParticipation = paidParticipation;
-        this.receiveMarketing = receiveMarketing;
+        this.userPass = "";
+        this.userSalt = "";
+        this.idNumber = null;
+        this.title = "Mr.";
+        this.firstName = "";
+        this.surname = "";
+        this.otherName = "";
+        this.gender = "MALE";
+        this.emailAddress = "";
+        this.postalAddress = "None";
+        this.city = "None";
+        this.countryCode = "ZA";
+        this.phoneNumber = "+27";
+        this.cellNumber = "+27";
+        this.firstRegistered = currentTime;
+        this.dateOfBirth = currentTime;
+        this.userType = UserTypes.NEW.toString();
+        this.paidParticipation = false;
+        this.receiveMarketing = false;
     }
 
     public Integer getUserId() {

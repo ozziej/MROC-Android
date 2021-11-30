@@ -10,6 +10,8 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 
 import android.view.KeyEvent;
@@ -45,12 +47,19 @@ public class LoginFragment extends Fragment {
         EditText emailAddressText = view.findViewById(R.id.editEmailAddress);
         EditText passwordText = view.findViewById(R.id.editPassword);
         Button loginButton = view.findViewById(R.id.loginButton);
+        Button registerButton = view.findViewById(R.id.registerButton);
+        final NavController navController = Navigation.findNavController(view);
 
         loginButton.setOnClickListener(l -> {
             String emailAddress = emailAddressText.getText().toString();
             String password = passwordText.getText().toString();
             hideKeyboard(view);
             userViewModel.login(emailAddress, password);
+        });
+
+        registerButton.setOnClickListener(l -> {
+            stateViewModel.setCurrentUserId(0);
+            navController.navigate(R.id.profileFragment);
         });
 
         passwordText.setOnEditorActionListener((textView, i, keyEvent) -> {

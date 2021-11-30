@@ -16,8 +16,12 @@ public class GenericResponse {
         IMAGE,
         COMPANY,
         USER,
+        USER_NICKNAME,
         SURVEY,
         PRODUCT,
+        JOIN_CHAT,
+        LEAVE_CHAT,
+        EDIT_CHAT,
         CHAT;
     }
 

@@ -44,7 +44,7 @@ public class MainFragment extends Fragment {
         stateViewModel = new ViewModelProvider(requireActivity()).get(SavedStateViewModel.class);
 
         Integer userId = stateViewModel.getCurrentUserId().getValue();
-        if (userId == null) {
+        if (userId == null || userId.equals(0)) {
             navController.navigate(R.id.loginFragment);
         } else {
             Users user = userViewModel.getCurrentUserData().getValue();

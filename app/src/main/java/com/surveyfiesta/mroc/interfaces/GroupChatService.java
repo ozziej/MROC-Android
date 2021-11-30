@@ -18,6 +18,12 @@ public interface GroupChatService {
     @POST("findGroupList")
     Call<List<UserGroupChatEntity>> findGroupList(@Body Users user);
 
+    @POST("findGroupByUuid")
+    Call<UserGroupChatEntity> findGroupByUuid(@Body GroupChat group);
+
+    @POST("joinGroupByUuid")
+    Call<GenericResponse> joinGroupByUuid(@Body UserGroupChatEntity chatRequest);
+
     @POST("getGroupMessages")
     Call<List<InstantNotification>> getGroupMessages(@Body GroupChat group);
 
@@ -27,14 +33,8 @@ public interface GroupChatService {
     @POST("editGroup")
     Call<GenericResponse> editGroup(@Body UserGroupChatEntity chatRequest);
 
-    @POST("addToGroup")
-    Call<GenericResponse> addToGroup(@Body GroupUsers groupUsers);
-
     @POST("findGroupMembers")
     Call<Set<GroupUsers>> findGroupMembers(@Body GroupChat groupChat);
-
-    @POST("updateNickname")
-    Call<GenericResponse> updateNickname(@Body GroupUsers groupUsers);
 
     @POST("leaveGroup")
     Call<GenericResponse> leaveGroup(@Body UserGroupChatEntity chatRequest);

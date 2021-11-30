@@ -13,5 +13,5 @@ public class DefaultValues {
     public static final String BASE_IMAGE_URL = BASE_URL + "/ImageServlet/";
     public static final String BASE_CHAT_URL = BASE_WEB_SERVICES+"/chat/";
     public static final String BASE_USERS_URL = BASE_WEB_SERVICES+"/users/";
-
+    public static final String BASE_SHARE_URL = BASE_CHAT_URL+ "share/";
 }

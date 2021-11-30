@@ -37,7 +37,7 @@ public class EditGroupDialogFragment extends DialogFragment implements TextWatch
         try {
             listener = (EditGroupDialogListener) getParentFragment();
         } catch (ClassCastException e){
-            throw new ClassCastException(e.getLocalizedMessage()+" Should be a fragment implementing EditGroupDialogListener");
+            throw new ClassCastException(e.getLocalizedMessage()+" Should be a fragment implementing "+EditGroupDialogListener.class.getSimpleName());
         }
     }
 
@@ -88,14 +88,10 @@ public class EditGroupDialogFragment extends DialogFragment implements TextWatch
     @Override
     public void afterTextChanged(Editable editable) {
         AlertDialog dialog = (AlertDialog) this.getDialog();
-        boolean disabled = this.editGroupDescriptionText.getText().length() == 0
-                || this.editGroupTitleText.getText().length() == 0;
+        boolean enabled = this.editGroupDescriptionText.getText().length() > 0
+                && this.editGroupTitleText.getText().length() > 0;
         if (dialog != null) {
-            if (disabled) {
-                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
-            } else {
-                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
-            }
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(enabled);
         }
     }
 
