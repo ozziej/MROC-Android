@@ -1,8 +1,6 @@
 package com.surveyfiesta.mroc;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.lifecycle.SavedStateHandle;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavBackStackEntry;
 import androidx.navigation.NavController;
@@ -15,9 +13,6 @@ import androidx.navigation.ui.NavigationUI;
 import android.os.Bundle;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.surveyfiesta.mroc.ui.grouplist.GroupListViewModel;
-import com.surveyfiesta.mroc.ui.login.LoginFragment;
-import com.surveyfiesta.mroc.ui.login.UserViewModel;
 import com.surveyfiesta.mroc.viewmodels.SavedStateViewModel;
 
 public class MainActivity extends AppCompatActivity {
@@ -40,8 +35,8 @@ public class MainActivity extends AppCompatActivity {
         NavBackStackEntry navBackStackEntry = navController.getCurrentBackStackEntry();
         stateViewModel = new ViewModelProvider(this).get(SavedStateViewModel.class);
 
-        Integer userId = stateViewModel.getCurrentUserId().getValue();
-        if (userId == null) {
+        String userToken = stateViewModel.getCurrentUserToken();
+        if (userToken == null) {
             int startDestination = navController.getGraph().getStartDestination();
             NavOptions navOptions = new NavOptions.Builder()
                     .setPopUpTo(startDestination, true)

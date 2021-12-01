@@ -1,11 +1,13 @@
 package com.surveyfiesta.mroc.ui.chat;
 
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.surveyfiesta.mroc.constants.DefaultValues;
 import com.surveyfiesta.mroc.entities.GroupChat;
 import com.surveyfiesta.mroc.entities.InstantNotification;
+import com.surveyfiesta.mroc.entities.UserGroupChatEntity;
 import com.surveyfiesta.mroc.interfaces.GroupChatService;
 
 import java.util.List;
@@ -18,6 +20,7 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 
 public class GroupChatViewModel extends ViewModel {
     MutableLiveData <List<InstantNotification>> notificationLiveDate = new MutableLiveData<>();
+    private final MutableLiveData <UserGroupChatEntity> groupChatData = new MutableLiveData<>();
 
     public GroupChatViewModel() {
     }
@@ -50,7 +53,38 @@ public class GroupChatViewModel extends ViewModel {
         }
     }
 
+    public void findGroupChat(String groupUuid) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(DefaultValues.BASE_CHAT_URL)
+                .addConverterFactory(JacksonConverterFactory.create())
+                .build();
+
+        GroupChatService service = retrofit.create(GroupChatService.class);
+        GroupChat groupChat = new GroupChat();
+        groupChat.setGroupUuid(groupUuid);
+        Call<UserGroupChatEntity> call = service.findGroupByUuid(groupChat);
+        call.enqueue(new Callback<UserGroupChatEntity>() {
+            @Override
+            public void onResponse(Call<UserGroupChatEntity> call, Response<UserGroupChatEntity> response) {
+                if (response.isSuccessful()) {
+                    groupChatData.setValue(response.body());
+                } else {
+                    groupChatData.setValue(null);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<UserGroupChatEntity> call, Throwable t) {
+                groupChatData.setValue(null);
+            }
+        });
+    }
+
     public MutableLiveData<List<InstantNotification>> getNotificationLiveDate() {
         return notificationLiveDate;
+    }
+
+    public LiveData<UserGroupChatEntity> getGroupChatData() {
+        return groupChatData;
     }
 }

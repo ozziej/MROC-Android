@@ -7,6 +7,14 @@
     tools:context=".ui.chat.GroupChatFragment"
     android:id="@+id/linearChatLayout">
 
+    <ProgressBar
+        android:id="@+id/simpleProgressBar"
+        style="@style/Widget.MaterialComponents.CircularProgressIndicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:visibility="visible" />
+
     <ScrollView
         android:id="@+id/chatScrollView"
         android:layout_width="match_parent"

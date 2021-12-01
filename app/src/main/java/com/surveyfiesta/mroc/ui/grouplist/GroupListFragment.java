@@ -1,9 +1,7 @@
 package com.surveyfiesta.mroc.ui.grouplist;
 
 import static com.surveyfiesta.mroc.constants.DefaultValues.BASE_SHARE_URL;
-import static com.surveyfiesta.mroc.constants.DefaultValues.BASE_USERS_URL;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -79,12 +77,12 @@ public class GroupListFragment extends Fragment implements ChatGroupListener, Ed
         final NavController navController = Navigation.findNavController(view);
         currentUser = userViewModel.getCurrentUserData().getValue();
 
-        Integer userId = stateViewModel.getCurrentUserId().getValue();
-        if (userId == null || userId.equals(0)) {
+        String userToken = stateViewModel.getCurrentUserToken();
+        if (userToken == null || userToken.isEmpty()) {
             navController.navigate(R.id.loginFragment);
         } else {
             if (currentUser == null) {
-                userViewModel.login(userId);
+                userViewModel.login(userToken);
             }
         }
 
@@ -194,7 +192,7 @@ public class GroupListFragment extends Fragment implements ChatGroupListener, Ed
     public void onRowClickListener(View view, int position) {
         UserGroupChatEntity chatEntity = groupListAdapter.getGroupList().get(position).getChatEntity();
         GroupChat groupChat = chatEntity.getGroupChat();
-        groupListViewModel.setSelectedChatData(groupChat);
+        stateViewModel.setCurrentChatUuid(groupChat.getGroupUuid());
         Navigation.findNavController(getView()).navigate(R.id.action_groupListFragment_to_groupChatFragment);
     }
 

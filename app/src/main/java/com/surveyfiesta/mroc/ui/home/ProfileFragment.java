@@ -54,21 +54,19 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
-        stateViewModel = new ViewModelProvider(requireActivity()).get(SavedStateViewModel.class);
         final NavController navController = Navigation.findNavController(view);
 
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
         stateViewModel = new ViewModelProvider(requireActivity()).get(SavedStateViewModel.class);
 
-        Integer userId = stateViewModel.getCurrentUserId().getValue();
-        if (userId == null) {
+        String userToken = stateViewModel.getCurrentUserToken();
+        if (userToken == null) {
             navController.navigate(R.id.loginFragment);
         } else {
             Users user = userViewModel.getCurrentUserData().getValue();
-            if (user == null && !userId.equals(0)) {
-                loginUser(userId, view);
-            } else if (userId.equals(0)) {
+            if (user == null && !userToken.isEmpty()) {
+                loginUser(userToken);
+            } else if (userToken.isEmpty()) {
                 createNewUser();
             } else {
                 displayUserDetails(user);
@@ -82,11 +80,11 @@ public class ProfileFragment extends Fragment {
         userViewModel.setCurrentUserData(user);
     }
 
-    private void loginUser(Integer userId, @NonNull View view) {
-        userViewModel.login(userId);
+    private void loginUser(String userToken) {
+        userViewModel.login(userToken);
         userViewModel.getLoginResult().observe(getViewLifecycleOwner(), result -> {
             if (!result.getResponseCode().equals(GenericResponse.ResponseCode.SUCCESSFUL)) {
-                Snackbar.make(view, result.getResponseMessage(), Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(getView(), result.getResponseMessage(), Snackbar.LENGTH_SHORT).show();
             } else {
                 displayUserDetails(result.getUser());
             }
@@ -112,7 +110,7 @@ public class ProfileFragment extends Fragment {
     }
 
     private void logoutUser() {
-        stateViewModel.setCurrentUserId(null);
+        stateViewModel.setCurrentUserToken(null);
         userViewModel.setCurrentUserData(null);
     }
 
@@ -121,10 +119,10 @@ public class ProfileFragment extends Fragment {
         hideKeyboard(getView());
         if (user != null) {
             updateUserModel(user);
-            userViewModel.updateUserDetails();
-            userViewModel.getUpdateResult().observe(getViewLifecycleOwner(), result ->{
+            userViewModel.updateUserDetails(stateViewModel.getCurrentUserToken());
+            userViewModel.getUpdateResult().observe(getViewLifecycleOwner(), result -> {
                 Snackbar.make(this.getView(), result.getResponseMessage(), Snackbar.LENGTH_SHORT).show();
-                stateViewModel.setCurrentUserId(user.getUserId());
+                stateViewModel.setCurrentUserToken(result.getToken());
                 displayUserDetails(user);
             });
         } else {

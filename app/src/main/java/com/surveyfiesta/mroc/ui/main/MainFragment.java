@@ -10,12 +10,9 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.TextView;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.surveyfiesta.mroc.R;
@@ -43,22 +40,22 @@ public class MainFragment extends Fragment {
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
         stateViewModel = new ViewModelProvider(requireActivity()).get(SavedStateViewModel.class);
 
-        Integer userId = stateViewModel.getCurrentUserId().getValue();
-        if (userId == null || userId.equals(0)) {
+        String userToken = stateViewModel.getCurrentUserToken();
+        if (userToken == null || userToken.isEmpty()) {
             navController.navigate(R.id.loginFragment);
         } else {
             Users user = userViewModel.getCurrentUserData().getValue();
             if (user == null) {
-                loginUser(userId, view);
+                loginUser(userToken);
             }
         }
     }
 
-    private void loginUser(Integer userId, @NonNull View view) {
-        userViewModel.login(userId);
+    private void loginUser(String userToken) {
+        userViewModel.login(userToken);
         userViewModel.getLoginResult().observe(getViewLifecycleOwner(), result -> {
             if (!result.getResponseCode().equals(GenericResponse.ResponseCode.SUCCESSFUL)) {
-                Snackbar.make(view, result.getResponseMessage(), Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(getView(), result.getResponseMessage(), Snackbar.LENGTH_SHORT).show();
             }
         });
     }

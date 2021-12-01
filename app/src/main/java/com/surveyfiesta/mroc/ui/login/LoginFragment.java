@@ -58,7 +58,7 @@ public class LoginFragment extends Fragment {
         });
 
         registerButton.setOnClickListener(l -> {
-            stateViewModel.setCurrentUserId(0);
+            stateViewModel.setCurrentUserToken(null);
             navController.navigate(R.id.profileFragment);
         });
 
@@ -76,7 +76,7 @@ public class LoginFragment extends Fragment {
 
         userViewModel.getLoginResult().observe(getViewLifecycleOwner(), result ->{
             if (result.getResponseCode().equals(GenericResponse.ResponseCode.SUCCESSFUL)) {
-                stateViewModel.setCurrentUserId(result.getUser().getUserId());
+                stateViewModel.setCurrentUserToken(result.getToken());
                 Snackbar.make(view, result.getResponseMessage(), Snackbar.LENGTH_SHORT).show();
                 NavHostFragment.findNavController(this).popBackStack();
             } else {

@@ -19,7 +19,7 @@ public interface UserService {
     Call<UserResponse> loginUser(@Body RequestBody body);
 
     @POST("update")
-    Call<UserResponse> updateUser(@Body Users users);
+    Call<UserResponse> updateUser(@Body UserResponse userResponse);
 
     @POST("updateNickname")
     Call<GenericResponse> updateNickname(@Body GroupUsers groupUsers);

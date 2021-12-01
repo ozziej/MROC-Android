@@ -13,6 +13,9 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 
 import android.util.Log;
 import android.view.Gravity;
@@ -23,17 +26,21 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.google.android.material.snackbar.Snackbar;
 import com.surveyfiesta.mroc.R;
+import com.surveyfiesta.mroc.entities.GenericResponse;
 import com.surveyfiesta.mroc.entities.GroupChat;
 import com.surveyfiesta.mroc.entities.InstantNotification;
 import com.surveyfiesta.mroc.entities.Users;
-import com.surveyfiesta.mroc.ui.grouplist.GroupListViewModel;
+
 import com.surveyfiesta.mroc.ui.login.UserViewModel;
+import com.surveyfiesta.mroc.viewmodels.SavedStateViewModel;
 import com.surveyfiesta.mroc.viewmodels.WebSocketViewModel;
 
 import java.time.LocalDateTime;
@@ -52,8 +59,8 @@ public class GroupChatFragment extends Fragment {
     private Users currentUser;
     private GroupChat groupChat;
     private UserViewModel userViewModel;
+    private SavedStateViewModel stateViewModel;
     private GroupChatViewModel groupChatViewModel;
-    private GroupListViewModel groupListViewModel;
     private WebSocketViewModel webSocketViewModel;
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -72,9 +79,10 @@ public class GroupChatFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        final NavController navController = Navigation.findNavController(view);
 
+        stateViewModel = new ViewModelProvider(requireActivity()).get(SavedStateViewModel.class);
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
-        groupListViewModel = new ViewModelProvider(requireActivity()).get(GroupListViewModel.class);
 
         groupChatViewModel = new ViewModelProvider(this).get(GroupChatViewModel.class);
         webSocketViewModel = new ViewModelProvider(this).get(WebSocketViewModel.class);
@@ -87,7 +95,26 @@ public class GroupChatFragment extends Fragment {
         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
         currentUser = userViewModel.getCurrentUserData().getValue();
-        groupChat = groupListViewModel.getSelectedChatData();
+        String groupChatUuid = stateViewModel.getCurrentChatUuid();
+
+        String userToken = stateViewModel.getCurrentUserToken();
+        if (userToken == null || userToken.isEmpty()) {
+            navController.navigate(R.id.loginFragment);
+        } else {
+            if (currentUser == null) {
+                userViewModel.login(userToken);
+            }
+        }
+
+        userViewModel.getLoginResult().observe(getViewLifecycleOwner(), result -> {
+            if (!result.getResponseCode().equals(GenericResponse.ResponseCode.SUCCESSFUL)) {
+                Snackbar.make(view, result.getResponseMessage(), Snackbar.LENGTH_SHORT).show();
+            } else {
+                currentUser = result.getUser();
+                chatLayout.removeAllViews();
+                groupChatViewModel.findGroupChat(groupChatUuid);
+            }
+        });
 
         sendChatButton.setOnClickListener(l -> {
             String chatText = chatTextView.getText().toString();
@@ -98,12 +125,14 @@ public class GroupChatFragment extends Fragment {
             }
         });
 
-        chatLayout.removeAllViews();
-        if (groupChat != null && currentUser != null) {
-            webSocketViewModel.initWebSocket(groupChat, currentUser);
-            webSocketViewModel.getNotificationLiveData().observe(getViewLifecycleOwner(), this::onChanged);
-        }
-        getInitialMessages();
+        groupChatViewModel.getGroupChatData().observe(getViewLifecycleOwner(), l -> {
+            groupChat = l.getGroupChat();
+            if (groupChat != null && currentUser != null) {
+                webSocketViewModel.initWebSocket(groupChat, currentUser);
+                webSocketViewModel.getNotificationLiveData().observe(getViewLifecycleOwner(), this::onChanged);
+            }
+            getInitialMessages();
+        });
     }
 
     private String encodeMessage(Integer groupId, Integer userId, String messageBody) {
@@ -135,6 +164,8 @@ public class GroupChatFragment extends Fragment {
 
     private void getInitialMessages() {
         if (groupChat != null && groupChatViewModel != null) {
+            ProgressBar simpleProgressBar = getView().findViewById(R.id.simpleProgressBar);
+            simpleProgressBar.setVisibility(View.VISIBLE);
             groupChatViewModel.findGroupChatMessages(groupChat);
             groupChatViewModel.getNotificationLiveDate().observe(getViewLifecycleOwner(), instantNotifications -> {
                 AtomicInteger previousDays = new AtomicInteger(0);
@@ -149,6 +180,7 @@ public class GroupChatFragment extends Fragment {
                         }
                         addMessageBox(i);
                     });
+                    simpleProgressBar.setVisibility(View.INVISIBLE);
                 }
             });
         }

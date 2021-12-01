@@ -41,13 +41,13 @@ public class UserViewModel extends ViewModel {
         this.currentUserData.setValue(null);
     }
 
-    public void login (Integer userId) {
+    public void login (String userToken) {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(DefaultValues.BASE_USERS_URL)
                 .addConverterFactory(JacksonConverterFactory.create())
                 .build();
-        Map<String, Integer> userMap = new HashMap<>();
-        userMap.put("userId", userId);
+        Map<String, String> userMap = new HashMap<>();
+        userMap.put("userToken", userToken);
         RequestBody body = RequestBody.create(new JSONObject(userMap).toString(), MediaType.parse("application/json; charset=utf-8"));
         UserService service = retrofit.create(UserService.class);
         loginUser(service.loginUser(body));
@@ -78,19 +78,19 @@ public class UserViewModel extends ViewModel {
                     }
                 } else {
                     currentUserData.setValue(null);
-                    loginResult.setValue(new UserResponse(GenericResponse.ResponseCode.ERROR, "Something Went Wrong : "+response.message(), GenericResponse.RequestCode.USER, null));
+                    loginResult.setValue(new UserResponse(GenericResponse.ResponseCode.ERROR, "Something Went Wrong : "+response.message(), GenericResponse.RequestCode.USER, null, "null"));
                 }
             }
 
             @Override
             public void onFailure(Call<UserResponse> call, Throwable t) {
                 currentUserData.setValue(null);
-                loginResult.setValue(new UserResponse(GenericResponse.ResponseCode.ERROR, "Something Went Wrong", GenericResponse.RequestCode.USER, null));
+                loginResult.setValue(new UserResponse(GenericResponse.ResponseCode.ERROR, "Something Went Wrong", GenericResponse.RequestCode.USER, null, "null"));
             }
         });
     }
 
-    public void updateUserDetails() {
+    public void updateUserDetails(String userToken) {
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         interceptor.level(HttpLoggingInterceptor.Level.BODY);
         OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
@@ -105,7 +105,8 @@ public class UserViewModel extends ViewModel {
 
         UserService service = retrofit.create(UserService.class);
         Users user = currentUserData.getValue();
-        Call<UserResponse> call = service.updateUser(user);
+        UserResponse userResponse = new UserResponse(user, userToken);
+        Call<UserResponse> call = service.updateUser(userResponse);
         call.enqueue(new Callback<UserResponse>() {
             @Override
             public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
@@ -116,16 +117,16 @@ public class UserViewModel extends ViewModel {
                         Users user = userResponse.getUser();
                         currentUserData.setValue(user);
                     } else {
-                        updateResult.setValue(new UserResponse(GenericResponse.ResponseCode.ERROR, "Something Went Wrong : "+response.message(), GenericResponse.RequestCode.USER, user));
+                        updateResult.setValue(new UserResponse(GenericResponse.ResponseCode.ERROR, "Something Went Wrong : "+response.message(), GenericResponse.RequestCode.USER, user,null));
                     }
                 } else {
-                    updateResult.setValue(new UserResponse(GenericResponse.ResponseCode.ERROR, "Something Went Wrong : "+response.message(), GenericResponse.RequestCode.USER, user));
+                    updateResult.setValue(new UserResponse(GenericResponse.ResponseCode.ERROR, "Something Went Wrong : "+response.message(), GenericResponse.RequestCode.USER, user, null));
                 }
             }
 
             @Override
             public void onFailure(Call<UserResponse> call, Throwable t) {
-                updateResult.setValue(new UserResponse(GenericResponse.ResponseCode.ERROR, "Something Went Wrong : "+t.getLocalizedMessage(), GenericResponse.RequestCode.USER, user));
+                updateResult.setValue(new UserResponse(GenericResponse.ResponseCode.ERROR, "Something Went Wrong : "+t.getLocalizedMessage(), GenericResponse.RequestCode.USER, user, null));
             }
         });
     }
