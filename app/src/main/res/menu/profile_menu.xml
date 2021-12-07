@@ -6,4 +6,9 @@
         android:id="@+id/button_save"
         android:title="@string/save"
         app:showAsAction="always" />
+    <item
+        android:icon="@drawable/ic_baseline_exit_to_app_24"
+        android:id="@+id/button_logout"
+        android:title="@string/logout"
+        app:showAsAction="always"/>
 </menu>

@@ -1,4 +1,5 @@
 <resources>
+    <string name="default_app_client_id">929636309408-mdd88drr9hmtssksh03tereve27gic01.apps.googleusercontent.com</string>
     <string name="app_name">MROC</string>
     <string name="profile">Profile</string>
     <string name="Chat">Chat</string>
@@ -13,6 +14,7 @@
     <string name="surname">Surname</string>
     <string name="cell_number">Cell Number</string>
     <string name="login">Login</string>
+    <string name="logout">Log Out</string>
     <string name="create_account">Create Account</string>
 
     <string name="edit">Edit</string>
@@ -33,4 +35,7 @@
     <string name="join">Join</string>
     <string name="join_group">Join Group</string>
     <string name="copied_link">Copied Link</string>
+    <string name="loading">Loading</string>
+    <string name="group_image">Image or Icon for Group</string>
+
 </resources>

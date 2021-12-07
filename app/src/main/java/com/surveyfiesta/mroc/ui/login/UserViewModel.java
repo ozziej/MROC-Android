@@ -53,6 +53,20 @@ public class UserViewModel extends ViewModel {
         loginUser(service.loginUser(body));
     }
 
+    public void signInWithGoogle (String emailAddress, String firstName, String surname) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(DefaultValues.BASE_USERS_URL)
+                .addConverterFactory(JacksonConverterFactory.create())
+                .build();
+        Map<String, String> userMap = new HashMap<>();
+        userMap.put("emailAddress", emailAddress);
+        userMap.put("firstName", firstName);
+        userMap.put("surname", surname);
+        RequestBody body = RequestBody.create(new JSONObject(userMap).toString(), MediaType.parse("application/json; charset=utf-8"));
+        UserService service = retrofit.create(UserService.class);
+        loginUser(service.signInWithGoogle(body));
+    }
+
     public void login (String emailAddress, String password) {
         UserLoginRequest request = new UserLoginRequest(emailAddress, password);
         Retrofit retrofit = new Retrofit.Builder()
@@ -141,6 +155,10 @@ public class UserViewModel extends ViewModel {
 
     public MutableLiveData<UserResponse> getLoginResult() {
         return loginResult;
+    }
+
+    public void setLoginResult(UserResponse loginResult) {
+        this.loginResult.setValue(loginResult);
     }
 
     public MutableLiveData<UserResponse> getUpdateResult() {

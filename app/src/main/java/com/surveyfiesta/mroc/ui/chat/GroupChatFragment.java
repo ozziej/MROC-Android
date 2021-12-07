@@ -2,6 +2,7 @@ package com.surveyfiesta.mroc.ui.chat;
 
 import static android.content.Context.INPUT_METHOD_SERVICE;
 
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.app.Activity;
@@ -15,9 +16,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
-import androidx.navigation.fragment.NavHostFragment;
 
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -47,8 +46,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import okhttp3.WebSocket;
 
 public class GroupChatFragment extends Fragment {
 
@@ -164,8 +161,9 @@ public class GroupChatFragment extends Fragment {
 
     private void getInitialMessages() {
         if (groupChat != null && groupChatViewModel != null) {
-            ProgressBar simpleProgressBar = getView().findViewById(R.id.simpleProgressBar);
+            ProgressBar simpleProgressBar = getView().findViewById(R.id.loginProgressBar);
             simpleProgressBar.setVisibility(View.VISIBLE);
+
             groupChatViewModel.findGroupChatMessages(groupChat);
             groupChatViewModel.getNotificationLiveDate().observe(getViewLifecycleOwner(), instantNotifications -> {
                 AtomicInteger previousDays = new AtomicInteger(0);
@@ -219,28 +217,23 @@ public class GroupChatFragment extends Fragment {
         layoutParams.topMargin = 4;
         layoutParams.rightMargin = 4;
         layoutParams.leftMargin = 4;
+
         GradientDrawable drawable;
-        String colourString;
+        drawable = new GradientDrawable();
+        drawable.setStroke(1, ContextCompat.getColor(getContext(), R.color.medium_grey));
+        drawable.setCornerRadius(10);
+
         if (isCurrentUser) {
             layoutParams.gravity = Gravity.RIGHT;
-            colourString = "#66bb6a";
+            drawable.setColor(ContextCompat.getColor(getContext(), R.color.sf_green));
         } else {
             layoutParams.gravity = Gravity.LEFT;
-            colourString = "#c7cfce";
+            drawable.setColor(ContextCompat.getColor(getContext(), R.color.light_grey));
         }
-        drawable = new GradientDrawable();
-        drawable.setStroke(1, Color.parseColor("#dddddd"));
-        drawable.setCornerRadius(10);
-        drawable.setColor(Color.parseColor(colourString));
         view.setBackground(drawable);
         view.setLayoutParams(layoutParams);
         chatLayout.addView(view);
-        chatScrollView.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                chatScrollView.fullScroll(View.FOCUS_DOWN);
-            }
-        },200);
+        chatScrollView.postDelayed(() -> chatScrollView.fullScroll(View.FOCUS_DOWN),200);
     }
 
     private void drawDayBubble(String displayText) {

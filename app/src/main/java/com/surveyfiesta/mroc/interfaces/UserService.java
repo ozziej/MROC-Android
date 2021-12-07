@@ -15,6 +15,9 @@ public interface UserService {
     @POST("login")
     Call<UserResponse> loginUser(@Body UserLoginRequest request);
 
+    @POST("signInWithGoogle")
+    Call<UserResponse> signInWithGoogle(@Body RequestBody body);
+
     @POST("login")
     Call<UserResponse> loginUser(@Body RequestBody body);
 

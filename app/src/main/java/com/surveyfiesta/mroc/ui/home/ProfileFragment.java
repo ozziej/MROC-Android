@@ -22,6 +22,9 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.material.snackbar.Snackbar;
 import com.surveyfiesta.mroc.R;
 import com.surveyfiesta.mroc.entities.GenericResponse;
@@ -31,9 +34,9 @@ import com.surveyfiesta.mroc.viewmodels.SavedStateViewModel;
 
 public class ProfileFragment extends Fragment {
 
-    private ProfileViewModel profileViewModel;
     private UserViewModel userViewModel;
     private SavedStateViewModel stateViewModel;
+    private GoogleSignInClient googleSignInClient;
 
     public static ProfileFragment newInstance() {
         return new ProfileFragment();
@@ -72,6 +75,13 @@ public class ProfileFragment extends Fragment {
                 displayUserDetails(user);
             }
         }
+
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_app_client_id))
+                .requestEmail()
+                .build();
+
+        googleSignInClient = GoogleSignIn.getClient(getContext(), gso);
     }
 
     private void createNewUser() {
@@ -103,6 +113,9 @@ public class ProfileFragment extends Fragment {
             case R.id.button_save:
                 updateWithResult();
                 break;
+            case R.id.button_logout:
+                logoutUser();
+                break;
             default:
                 break;
         }
@@ -110,8 +123,13 @@ public class ProfileFragment extends Fragment {
     }
 
     private void logoutUser() {
+        final NavController navController = Navigation.findNavController(getView());
         stateViewModel.setCurrentUserToken(null);
+        userViewModel.setLoginResult(null);
         userViewModel.setCurrentUserData(null);
+        googleSignInClient.signOut().addOnCompleteListener(getActivity(), l-> {
+            navController.popBackStack();
+        });
     }
 
     private void updateWithResult() {

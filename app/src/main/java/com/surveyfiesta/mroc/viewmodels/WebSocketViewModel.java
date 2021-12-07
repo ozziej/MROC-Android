@@ -1,5 +1,7 @@
 package com.surveyfiesta.mroc.viewmodels;
 
+import static com.surveyfiesta.mroc.constants.DefaultValues.BASE_WEB_SOCKET;
+
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -70,7 +72,7 @@ public class WebSocketViewModel extends ViewModel {
                 .build();
 
         Request request = new Request.Builder()
-                .url("ws://localhost:8080/SurveyFiesta/chat/"+currentUser.getFirstName())
+                .url(BASE_WEB_SOCKET+currentUser.getFirstName())
                 .build();
         webSocket = client.newWebSocket(request, socketListener);
         client.dispatcher().executorService().shutdown();
