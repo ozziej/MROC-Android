@@ -53,7 +53,7 @@ public class UserViewModel extends ViewModel {
         loginUser(service.loginUser(body));
     }
 
-    public void signInWithGoogle (String emailAddress, String firstName, String surname) {
+    public void signInWithGoogle (String emailAddress, String firstName, String surname, String idToken) {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(DefaultValues.BASE_USERS_URL)
                 .addConverterFactory(JacksonConverterFactory.create())
@@ -62,6 +62,7 @@ public class UserViewModel extends ViewModel {
         userMap.put("emailAddress", emailAddress);
         userMap.put("firstName", firstName);
         userMap.put("surname", surname);
+        userMap.put("idToken", idToken);
         RequestBody body = RequestBody.create(new JSONObject(userMap).toString(), MediaType.parse("application/json; charset=utf-8"));
         UserService service = retrofit.create(UserService.class);
         loginUser(service.signInWithGoogle(body));

@@ -142,7 +142,7 @@ public class LoginFragment extends Fragment {
     private void signInUser() {
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(getContext());
         if (account != null) {
-            userViewModel.signInWithGoogle(account.getEmail(), account.getGivenName(), account.getFamilyName());
+            userViewModel.signInWithGoogle(account.getEmail(), account.getGivenName(), account.getFamilyName(), account.getIdToken());
         }
     }
 
