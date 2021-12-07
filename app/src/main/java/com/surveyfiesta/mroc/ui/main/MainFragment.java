@@ -2,6 +2,9 @@ package com.surveyfiesta.mroc.ui.main;
 
 import androidx.lifecycle.ViewModelProvider;
 
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -13,6 +16,7 @@ import androidx.navigation.Navigation;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.surveyfiesta.mroc.R;
@@ -39,6 +43,7 @@ public class MainFragment extends Fragment {
 
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
         stateViewModel = new ViewModelProvider(requireActivity()).get(SavedStateViewModel.class);
+        Button termsConditionsButton = view.findViewById(R.id.termsConditionsButton);
 
         String userToken = stateViewModel.getCurrentUserToken();
         if (userToken == null || userToken.isEmpty()) {
@@ -49,6 +54,17 @@ public class MainFragment extends Fragment {
                 loginUser(userToken);
             }
         }
+        termsConditionsButton.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.surveyfiesta.com/terms-and-conditions/"));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.setPackage("com.android.chrome");
+            try{
+                startActivity(intent);
+            }catch (ActivityNotFoundException ex) {
+                intent.setPackage(null);
+                startActivity(Intent.createChooser(intent, "Select Browser"));
+            }
+        });
     }
 
     private void loginUser(String userToken) {

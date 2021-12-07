@@ -37,5 +37,6 @@
     <string name="copied_link">Copied Link</string>
     <string name="loading">Loading</string>
     <string name="group_image">Image or Icon for Group</string>
+    <string name="terms_conditions">Terms and Conditions</string>
 
 </resources>

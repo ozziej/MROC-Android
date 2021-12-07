@@ -7,8 +7,10 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -65,6 +67,7 @@ public class LoginFragment extends Fragment {
         Button loginButton = view.findViewById(R.id.loginButton);
         Button registerButton = view.findViewById(R.id.registerButton);
         SignInButton signInButton = view.findViewById(R.id.signInButton);
+        Button termsConditionsButton = view.findViewById(R.id.loginTermsConditionsButton);
         final NavController navController = Navigation.findNavController(view);
 
         loginButton.setOnClickListener(l -> {
@@ -137,6 +140,18 @@ public class LoginFragment extends Fragment {
                 }
         );
         signInUser();
+
+        termsConditionsButton.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.surveyfiesta.com/terms-and-conditions/"));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.setPackage("com.android.chrome");
+            try{
+                startActivity(intent);
+            }catch (ActivityNotFoundException ex) {
+                intent.setPackage(null);
+                startActivity(Intent.createChooser(intent, "Select Browser"));
+            }
+        });
     }
 
     private void signInUser() {
