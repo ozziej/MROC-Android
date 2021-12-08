@@ -142,7 +142,7 @@ public class LoginFragment extends Fragment {
         signInUser();
 
         termsConditionsButton.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.surveyfiesta.com/terms-and-conditions/"));
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.terms_uri)));
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             intent.setPackage("com.android.chrome");
             try{

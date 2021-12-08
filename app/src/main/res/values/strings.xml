@@ -38,5 +38,5 @@
     <string name="loading">Loading</string>
     <string name="group_image">Image or Icon for Group</string>
     <string name="terms_conditions">Terms and Conditions</string>
-
+    <string name="terms_uri">"https://www.surveyfiesta.com/terms-and-conditions/"</string>
 </resources>
