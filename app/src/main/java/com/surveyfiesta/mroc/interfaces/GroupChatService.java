@@ -33,9 +33,6 @@ public interface GroupChatService {
     @POST("editGroup")
     Call<GenericResponse> editGroup(@Body UserGroupChatEntity chatRequest);
 
-    @POST("findGroupMembers")
-    Call<Set<GroupUsers>> findGroupMembers(@Body GroupChat groupChat);
-
     @POST("leaveGroup")
     Call<GenericResponse> leaveGroup(@Body UserGroupChatEntity chatRequest);
 

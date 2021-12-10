@@ -3,33 +3,23 @@ package com.surveyfiesta.mroc.entities;
 import java.util.Objects;
 
 public class GroupUsers {
-    Integer userId;
-    String nickname;
+
+    Users user;
     boolean adminUser;
 
     public GroupUsers() {
     }
 
-    public GroupUsers(Integer userId, String nickname, boolean adminUser) {
-        this.userId = userId;
-        this.nickname = nickname;
+    public GroupUsers(Users user, boolean adminUser) {
         this.adminUser = adminUser;
     }
 
-    public Integer getUserId() {
-        return userId;
+    public Users getUser() {
+        return user;
     }
 
-    public void setUserId(Integer userId) {
-        this.userId = userId;
-    }
-
-    public String getNickname() {
-        return nickname;
-    }
-
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
+    public void setUser(Users user) {
+        this.user = user;
     }
 
     public boolean isAdminUser() {
@@ -42,14 +32,18 @@ public class GroupUsers {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         GroupUsers that = (GroupUsers) o;
-        return userId.equals(that.userId);
+        return user.equals(that.user);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(userId);
+        return Objects.hash(user);
     }
 }

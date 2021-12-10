@@ -144,7 +144,7 @@ public class GroupUserFragment extends Fragment implements GroupUserListener, Ed
         modifiedUsers.add(modifiedUser);
         UserGroupChatEntity chatEntity = new UserGroupChatEntity(groupChat, modifiedUsers);
 
-        if (currentUser.getUserId().equals(modifiedUser.getUserId())){
+        if (currentUser.getUserId().equals(modifiedUser.getUser().getUserId())){
             Snackbar.make(getView(), "You cannot modify yourself.",Snackbar.LENGTH_SHORT).show();
         } else {
             if (removeUser) {
@@ -157,5 +157,13 @@ public class GroupUserFragment extends Fragment implements GroupUserListener, Ed
             userListAdapter.setSelectedPos(RecyclerView.NO_POSITION);
             userListAdapter.notifyItemChanged(position);
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        if (actionMode != null) {
+            actionMode.finish();
+        }
+        super.onDestroy();
     }
 }

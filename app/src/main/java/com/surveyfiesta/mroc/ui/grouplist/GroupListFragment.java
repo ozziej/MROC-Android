@@ -171,7 +171,7 @@ public class GroupListFragment extends Fragment implements ChatGroupListener, Ed
     private void showNewGroupDialog() {
         UserGroupChatEntity chatEntity = new UserGroupChatEntity();
         List<GroupUsers> usersList = new ArrayList<>();
-        GroupUsers groupUsers = new GroupUsers(currentUser.getUserId(), currentUser.getFirstName(), true);
+        GroupUsers groupUsers = new GroupUsers(currentUser, true);
         usersList.add(groupUsers);
         chatEntity.setGroupChat(new GroupChat());
         chatEntity.setGroupUsers(usersList);
@@ -182,7 +182,7 @@ public class GroupListFragment extends Fragment implements ChatGroupListener, Ed
     private void showEditGroupDialog(int position) {
         UserGroupChatEntity chatEntity = groupListAdapter.getGroupList().get(position).getChatEntity();
         boolean adminUser = chatEntity.getGroupUsers().stream()
-                .filter(i-> i.getUserId().equals(currentUser.getUserId()))
+                .filter(i-> i.getUser().getUserId().equals(currentUser.getUserId()))
                 .anyMatch(i-> i.isAdminUser());
         if (adminUser) {
             editGroupDialogFragment = new EditGroupDialogFragment(chatEntity);
@@ -228,7 +228,7 @@ public class GroupListFragment extends Fragment implements ChatGroupListener, Ed
         String groupUuid = joinUrl.replace(BASE_SHARE_URL,"").toUpperCase();
         if (!groupUuid.isEmpty() && groupUuid.length() < 37) {
             List<GroupUsers> usersList = new ArrayList<>();
-            GroupUsers groupUsers = new GroupUsers(currentUser.getUserId(), currentUser.getFirstName(), false);
+            GroupUsers groupUsers = new GroupUsers(currentUser, false);
             usersList.add(groupUsers);
 
             GroupChat chat = new GroupChat();
@@ -306,4 +306,11 @@ public class GroupListFragment extends Fragment implements ChatGroupListener, Ed
         return false;
     }
 
+    @Override
+    public void onDestroy() {
+        if (actionMode != null) {
+            actionMode.finish();
+        }
+        super.onDestroy();
+    }
 }

@@ -25,6 +25,6 @@ public interface UserService {
     Call<UserResponse> updateUser(@Body UserResponse userResponse);
 
     @POST("updateNickname")
-    Call<GenericResponse> updateNickname(@Body GroupUsers groupUsers);
+    Call<GenericResponse> updateNickname(@Body RequestBody body);
 
 }

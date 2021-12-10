@@ -8,10 +8,10 @@ public class UserResponse extends GenericResponse {
         super(ResponseCode.SUCCESSFUL, "", RequestCode.USER);
     }
 
-    public UserResponse(ResponseCode responseCode, String responseMessage, RequestCode requestCode, Users user, String token) {
+    public UserResponse(ResponseCode responseCode, String responseMessage, RequestCode requestCode) {
         super(responseCode, responseMessage, requestCode);
-        this.user = user;
-        this.token = token;
+        this.user = null;
+        this.token = null;
     }
 
     public UserResponse(Users user, String token){

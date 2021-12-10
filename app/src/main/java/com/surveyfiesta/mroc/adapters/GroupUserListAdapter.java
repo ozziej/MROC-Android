@@ -4,7 +4,6 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -16,8 +15,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.surveyfiesta.mroc.R;
 import com.surveyfiesta.mroc.entities.GroupUsers;
 import com.surveyfiesta.mroc.interfaces.GroupUserListener;
-
-import org.w3c.dom.Text;
 
 import java.util.List;
 
@@ -45,7 +42,7 @@ public class GroupUserListAdapter extends RecyclerView.Adapter<RecyclerView.View
         GroupUsers groupUsers = groupUsersList.get(position);
         GroupUserViewHolder viewHolder = (GroupUserViewHolder)holder;
         viewHolder.groupUserImageView.setImageResource(R.drawable.ic_baseline_chat_24);
-        viewHolder.groupUserDisplayName.setText(groupUsers.getNickname());
+        viewHolder.groupUserDisplayName.setText(groupUsers.getUser().getOtherName());
         viewHolder.groupUserStatusText.setText(groupUsers.isAdminUser()?"Admin":"User");
         viewHolder.groupUserStatusImage.setImageResource(groupUsers.isAdminUser()?R.drawable.ic_outline_verified_user_24:R.drawable.ic_baseline_perm_identity_24);
         viewHolder.itemView.setOnClickListener(view -> listener.onUserRowClickListener(view, position));

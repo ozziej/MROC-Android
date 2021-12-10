@@ -95,14 +95,14 @@ public class UserViewModel extends ViewModel {
                     }
                 } else {
                     currentUserData.setValue(null);
-                    loginResult.setValue(new UserResponse(GenericResponse.ResponseCode.ERROR, "Something Went Wrong : "+response.message(), GenericResponse.RequestCode.USER, null, "null"));
+                    loginResult.setValue(new UserResponse(GenericResponse.ResponseCode.ERROR, "Something Went Wrong : "+response.message(), GenericResponse.RequestCode.USER));
                 }
             }
 
             @Override
             public void onFailure(Call<UserResponse> call, Throwable t) {
                 currentUserData.setValue(null);
-                loginResult.setValue(new UserResponse(GenericResponse.ResponseCode.ERROR, "Something Went Wrong", GenericResponse.RequestCode.USER, null, "null"));
+                loginResult.setValue(new UserResponse(GenericResponse.ResponseCode.ERROR, "Something Went Wrong", GenericResponse.RequestCode.USER));
             }
         });
     }
@@ -134,16 +134,16 @@ public class UserViewModel extends ViewModel {
                         Users user = userResponse.getUser();
                         currentUserData.setValue(user);
                     } else {
-                        updateResult.setValue(new UserResponse(GenericResponse.ResponseCode.ERROR, "Something Went Wrong : "+response.message(), GenericResponse.RequestCode.USER, user,null));
+                        updateResult.setValue(new UserResponse(GenericResponse.ResponseCode.ERROR, "Something Went Wrong : "+response.message(), GenericResponse.RequestCode.USER));
                     }
                 } else {
-                    updateResult.setValue(new UserResponse(GenericResponse.ResponseCode.ERROR, "Something Went Wrong : "+response.message(), GenericResponse.RequestCode.USER, user, null));
+                    updateResult.setValue(new UserResponse(GenericResponse.ResponseCode.ERROR, "Something Went Wrong : "+response.message(), GenericResponse.RequestCode.USER));
                 }
             }
 
             @Override
             public void onFailure(Call<UserResponse> call, Throwable t) {
-                updateResult.setValue(new UserResponse(GenericResponse.ResponseCode.ERROR, "Something Went Wrong : "+t.getLocalizedMessage(), GenericResponse.RequestCode.USER, user, null));
+                updateResult.setValue(new UserResponse(GenericResponse.ResponseCode.ERROR, "Something Went Wrong : "+t.getLocalizedMessage(), GenericResponse.RequestCode.USER));
             }
         });
     }

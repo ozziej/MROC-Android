@@ -159,7 +159,7 @@ public class GroupChatFragment extends Fragment {
     }
 
     private void showUserListFragment() {
-        if (groupUsersList.stream().anyMatch(i -> i.getUserId().equals(currentUser.getUserId()))) {
+        if (groupUsersList.stream().anyMatch(i -> i.getUser().getUserId().equals(currentUser.getUserId()))) {
             Navigation.findNavController(getView()).navigate(R.id.action_groupChatFragment_to_groupUserFragment);
         } else {
             Snackbar.make(getView(), "Sorry, you don't have permission to do that.", Snackbar.LENGTH_SHORT).show();

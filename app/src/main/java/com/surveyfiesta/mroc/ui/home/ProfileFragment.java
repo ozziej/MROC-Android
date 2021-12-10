@@ -152,14 +152,16 @@ public class ProfileFragment extends Fragment {
         }
     }
 
-    private void updateUserModel(Users user){
+    private void updateUserModel(Users user) {
         EditText firstNameView = this.getView().findViewById(R.id.firstNameEditText);
         EditText surnameView = this.getView().findViewById(R.id.surnameEditText);
         EditText emailAddress = this.getView().findViewById(R.id.emailAddressEditText);
         EditText cellNumber = this.getView().findViewById(R.id.cellNumberEditText);
+        EditText nickname = this.getView().findViewById(R.id.userNicknameEditText);
 
         user.setFirstName(firstNameView.getText().toString());
         user.setSurname(surnameView.getText().toString());
+        user.setOtherName(nickname.getText().toString());
         user.setEmailAddress(emailAddress.getText().toString());
         user.setCellNumber(cellNumber.getText().toString());
     }
@@ -169,11 +171,13 @@ public class ProfileFragment extends Fragment {
         EditText surnameView = this.getView().findViewById(R.id.surnameEditText);
         EditText emailAddress = this.getView().findViewById(R.id.emailAddressEditText);
         EditText cellNumber = this.getView().findViewById(R.id.cellNumberEditText);
+        EditText nickname = this.getView().findViewById(R.id.userNicknameEditText);
 
         firstNameView.setText(user.getFirstName());
         surnameView.setText(user.getSurname());
         emailAddress.setText(user.getEmailAddress());
         cellNumber.setText(user.getCellNumber());
+        nickname.setText(user.getOtherName());
     }
 
     private void hideKeyboard(View v) {
