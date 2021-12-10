@@ -2,23 +2,16 @@ package com.surveyfiesta.mroc.ui.chat;
 
 import static android.content.Context.INPUT_METHOD_SERVICE;
 
-import androidx.core.content.ContextCompat;
-import androidx.lifecycle.ViewModelProvider;
-
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -29,15 +22,23 @@ import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.android.material.snackbar.Snackbar;
 import com.surveyfiesta.mroc.R;
 import com.surveyfiesta.mroc.entities.GenericResponse;
 import com.surveyfiesta.mroc.entities.GroupChat;
+import com.surveyfiesta.mroc.entities.GroupUsers;
 import com.surveyfiesta.mroc.entities.InstantNotification;
 import com.surveyfiesta.mroc.entities.Users;
-
 import com.surveyfiesta.mroc.ui.login.UserViewModel;
 import com.surveyfiesta.mroc.viewmodels.SavedStateViewModel;
 import com.surveyfiesta.mroc.viewmodels.WebSocketViewModel;
@@ -45,6 +46,7 @@ import com.surveyfiesta.mroc.viewmodels.WebSocketViewModel;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class GroupChatFragment extends Fragment {
@@ -55,6 +57,8 @@ public class GroupChatFragment extends Fragment {
     private ScrollView chatScrollView;
     private Users currentUser;
     private GroupChat groupChat;
+    private List<GroupUsers> groupUsersList;
+
     private UserViewModel userViewModel;
     private SavedStateViewModel stateViewModel;
     private GroupChatViewModel groupChatViewModel;
@@ -70,6 +74,7 @@ public class GroupChatFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+        setHasOptionsMenu(true);
         return inflater.inflate(R.layout.group_chat_fragment, container, false);
     }
 
@@ -124,12 +129,41 @@ public class GroupChatFragment extends Fragment {
 
         groupChatViewModel.getGroupChatData().observe(getViewLifecycleOwner(), l -> {
             groupChat = l.getGroupChat();
+            groupUsersList = l.getGroupUsers();
+
             if (groupChat != null && currentUser != null) {
                 webSocketViewModel.initWebSocket(groupChat, currentUser);
                 webSocketViewModel.getNotificationLiveData().observe(getViewLifecycleOwner(), this::onChanged);
             }
+
             getInitialMessages();
         });
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        inflater.inflate(R.menu.edit_chat_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch(item.getItemId()) {
+            case R.id.editGroupUsersButton:
+                showUserListFragment();
+                break;
+            default:
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void showUserListFragment() {
+        if (groupUsersList.stream().anyMatch(i -> i.getUserId().equals(currentUser.getUserId()))) {
+            Navigation.findNavController(getView()).navigate(R.id.action_groupChatFragment_to_groupUserFragment);
+        } else {
+            Snackbar.make(getView(), "Sorry, you don't have permission to do that.", Snackbar.LENGTH_SHORT).show();
+        }
     }
 
     private String encodeMessage(Integer groupId, Integer userId, String messageBody) {

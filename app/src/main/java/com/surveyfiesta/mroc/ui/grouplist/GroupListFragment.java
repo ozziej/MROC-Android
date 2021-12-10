@@ -14,10 +14,12 @@ import androidx.lifecycle.ViewModelProvider;
 
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -34,7 +36,7 @@ import com.surveyfiesta.mroc.entities.GroupChatRecyclerEntity;
 import com.surveyfiesta.mroc.entities.GroupUsers;
 import com.surveyfiesta.mroc.entities.UserGroupChatEntity;
 import com.surveyfiesta.mroc.entities.Users;
-import com.surveyfiesta.mroc.helpers.EditMenuCallback;
+import com.surveyfiesta.mroc.helpers.GroupEditMenuCallback;
 import com.surveyfiesta.mroc.interfaces.ChatGroupListener;
 import com.surveyfiesta.mroc.interfaces.EditGroupDialogListener;
 import com.surveyfiesta.mroc.interfaces.EditMenuActionItemListener;
@@ -57,8 +59,8 @@ public class GroupListFragment extends Fragment implements ChatGroupListener, Ed
 
     private UserViewModel userViewModel;
     private SavedStateViewModel stateViewModel;
-    private EditMenuCallback callback;
-
+    private GroupEditMenuCallback callback;
+    private ActionMode actionMode;
     private Users currentUser;
 
     @Override
@@ -110,9 +112,11 @@ public class GroupListFragment extends Fragment implements ChatGroupListener, Ed
                 recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
                 recyclerView.setHasFixedSize(true);
                 recyclerView.setAdapter(groupListAdapter);
-
-                swipeGroupContainer.setRefreshing(false);
+            } else {
+                Snackbar.make(getView(), "There seems to be a problem, please try again.", Snackbar.LENGTH_SHORT).show();
+                NavHostFragment.findNavController(this).popBackStack();
             }
+            swipeGroupContainer.setRefreshing(false);
         });
 
         groupListViewModel.getGenericResponseData().observe(getViewLifecycleOwner(), response -> {
@@ -135,7 +139,7 @@ public class GroupListFragment extends Fragment implements ChatGroupListener, Ed
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
         swipeGroupContainer.setRefreshing(true);
-        callback = new EditMenuCallback(this::onActionItemClicked);
+        callback = new GroupEditMenuCallback(this::onActionItemClicked);
     }
 
     @Override
@@ -193,13 +197,16 @@ public class GroupListFragment extends Fragment implements ChatGroupListener, Ed
         UserGroupChatEntity chatEntity = groupListAdapter.getGroupList().get(position).getChatEntity();
         GroupChat groupChat = chatEntity.getGroupChat();
         stateViewModel.setCurrentChatUuid(groupChat.getGroupUuid());
+        if (actionMode != null) {
+            actionMode.finish();
+        }
         Navigation.findNavController(getView()).navigate(R.id.action_groupListFragment_to_groupChatFragment);
     }
 
     @Override
     public void onButtonClickListener(View view, int position) {
         callback.setRowPosition(position);
-        view.startActionMode(callback);
+        actionMode = view.startActionMode(callback);
     }
 
     @Override

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:title="@string/leave"
+        android:id="@+id/button_user_leave_group"
+        android:icon="@drawable/ic_baseline_exit_to_app_24"
+        app:showAsAction="ifRoom"/>
+
+    <item android:title="@string/set_as_admin"
+        android:id="@+id/button_set_as_admin"
+        android:icon="@drawable/ic_outline_verified_user_24"
+        app:showAsAction="ifRoom"/>
+
+    <item android:title="@string/set_as_user"
+        android:id="@+id/button_set_as_user"
+        android:icon="@drawable/ic_baseline_perm_identity_24"
+        app:showAsAction="ifRoom"/>
+</menu>

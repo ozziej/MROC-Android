@@ -93,10 +93,14 @@ public class ProfileFragment extends Fragment {
     private void loginUser(String userToken) {
         userViewModel.login(userToken);
         userViewModel.getLoginResult().observe(getViewLifecycleOwner(), result -> {
-            if (!result.getResponseCode().equals(GenericResponse.ResponseCode.SUCCESSFUL)) {
-                Snackbar.make(getView(), result.getResponseMessage(), Snackbar.LENGTH_SHORT).show();
+            if (result != null) {
+                if (!result.getResponseCode().equals(GenericResponse.ResponseCode.SUCCESSFUL)) {
+                    Snackbar.make(getView(), result.getResponseMessage(), Snackbar.LENGTH_SHORT).show();
+                } else {
+                    displayUserDetails(result.getUser());
+                }
             } else {
-                displayUserDetails(result.getUser());
+                Navigation.findNavController(getView()).popBackStack();
             }
         });
     }

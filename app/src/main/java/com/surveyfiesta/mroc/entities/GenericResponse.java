@@ -29,7 +29,8 @@ public class GenericResponse {
         LEAVE_GROUP,
         NEW_GROUP,
         EDIT_GROUP,
-        ADD_USER
+        ADD_USER,
+        EDIT_GROUP_USERS;
     }
 
     public GenericResponse() {

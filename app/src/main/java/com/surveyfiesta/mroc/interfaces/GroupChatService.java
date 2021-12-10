@@ -39,4 +39,7 @@ public interface GroupChatService {
     @POST("leaveGroup")
     Call<GenericResponse> leaveGroup(@Body UserGroupChatEntity chatRequest);
 
+    @POST("editGroupUsers")
+    Call<GenericResponse> editGroupUsers(@Body UserGroupChatEntity chatRequest);
+
 }

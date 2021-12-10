@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.surveyfiesta.mroc.constants.DefaultValues;
 import com.surveyfiesta.mroc.entities.GenericResponse;
+import com.surveyfiesta.mroc.entities.GroupUsers;
 import com.surveyfiesta.mroc.entities.UserLoginRequest;
 import com.surveyfiesta.mroc.entities.UserResponse;
 import com.surveyfiesta.mroc.entities.Users;
@@ -18,6 +19,7 @@ import com.surveyfiesta.mroc.interfaces.UserService;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import okhttp3.MediaType;
@@ -165,4 +167,5 @@ public class UserViewModel extends ViewModel {
     public MutableLiveData<UserResponse> getUpdateResult() {
         return updateResult;
     }
+
 }

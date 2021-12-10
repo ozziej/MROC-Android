@@ -28,7 +28,20 @@
         android:id="@+id/groupChatFragment"
         android:name="com.surveyfiesta.mroc.ui.chat.GroupChatFragment"
         android:label="Groups"
-        tools:layout="@layout/group_chat_fragment"/>
+        tools:layout="@layout/group_chat_fragment">
+        <action
+            android:id="@+id/action_groupChatFragment_to_groupUserFragment"
+            app:destination="@id/groupUserFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/groupUserFragment"
+        android:name="com.surveyfiesta.mroc.ui.chat.GroupUserFragment"
+        android:label="@string/edit_users"
+        tools:layout="@layout/group_user_fragment"/>
+
     <fragment
         android:id="@+id/groupListFragment"
         android:name="com.surveyfiesta.mroc.ui.grouplist.GroupListFragment"

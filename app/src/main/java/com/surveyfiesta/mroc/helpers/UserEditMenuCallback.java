@@ -8,19 +8,19 @@ import android.view.MenuItem;
 import com.surveyfiesta.mroc.R;
 import com.surveyfiesta.mroc.interfaces.EditMenuActionItemListener;
 
-public class EditMenuCallback implements ActionMode.Callback{
+public class UserEditMenuCallback implements ActionMode.Callback {
 
     private EditMenuActionItemListener itemListener;
     private int rowPosition;
 
-    public EditMenuCallback(EditMenuActionItemListener itemListener) {
+    public UserEditMenuCallback(EditMenuActionItemListener itemListener) {
         this.itemListener = itemListener;
     }
 
     @Override
     public boolean onCreateActionMode(ActionMode mode, Menu menu) {
         MenuInflater inflater = mode.getMenuInflater();
-        inflater.inflate(R.menu.edit_group_list_menu, menu);
+        inflater.inflate(R.menu.edit_group_users_menu, menu);
         return true;
     }
 

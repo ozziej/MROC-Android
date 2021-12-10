@@ -96,6 +96,9 @@ public class GroupListViewModel extends ViewModel {
             case LEAVE_GROUP:
                 call = service.leaveGroup(chatEntity);
                 break;
+            case EDIT_GROUP_USERS:
+                call = service.editGroupUsers(chatEntity);
+                break;
             default:
                 break;
         }

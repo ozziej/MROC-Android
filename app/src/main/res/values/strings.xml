@@ -8,10 +8,12 @@
     <string name="chat_bubble_time">Time</string>
     <string name="sf_logo">SurveyFiesta Logo</string>
 
+    <string name="user_image">User Image</string>
     <string name="email_address">Email Address</string>
     <string name="password">Password</string>
     <string name="first_name">First Name</string>
     <string name="surname">Surname</string>
+    <string name="display_name">Display Name</string>
     <string name="cell_number">Cell Number</string>
     <string name="login">Login</string>
     <string name="logout">Log Out</string>
@@ -27,6 +29,12 @@
     <string name="leave">Leave</string>
     <string name="new_group">New Group</string>
     <string name="edit_group">Edit Group</string>
+    <string name="edit_users">Edit Users</string>
+    <string name="set_as_admin">Make Admin</string>
+    <string name="set_as_user">Remove as Admin</string>
+    <string name="status">Status</string>
+    <string name="admin">Admin</string>
+    <string name="user">User</string>
     <string name="title">Title</string>
     <string name="description">Description</string>
 
