@@ -109,12 +109,14 @@ public class GroupUserFragment extends Fragment implements GroupUserListener, Ed
 
     @Override
     public void onUserRowClickListener(View view, int position) {
-        callback.setRowPosition(position);
-        actionMode = view.startActionMode(callback);
-        int previousItem = userListAdapter.getSelectedPos();
-        userListAdapter.notifyItemChanged(previousItem);
-        userListAdapter.setSelectedPos(position);
-        userListAdapter.notifyItemChanged(position);
+        if (groupChat != null && groupChat.isGroupEnabled()) {
+            callback.setRowPosition(position);
+            actionMode = view.startActionMode(callback);
+            int previousItem = userListAdapter.getSelectedPos();
+            userListAdapter.notifyItemChanged(previousItem);
+            userListAdapter.setSelectedPos(position);
+            userListAdapter.notifyItemChanged(position);
+        }
     }
 
     @Override

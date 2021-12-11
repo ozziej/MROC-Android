@@ -27,8 +27,11 @@
     <fragment
         android:id="@+id/groupChatFragment"
         android:name="com.surveyfiesta.mroc.ui.chat.GroupChatFragment"
-        android:label="Groups"
+        android:label="@string/title_label"
         tools:layout="@layout/group_chat_fragment">
+        <argument
+            android:name="title_label"
+            app:argType="string"/>
         <action
             android:id="@+id/action_groupChatFragment_to_groupUserFragment"
             app:destination="@id/groupUserFragment"

@@ -200,7 +200,9 @@ public class GroupListFragment extends Fragment implements ChatGroupListener, Ed
         if (actionMode != null) {
             actionMode.finish();
         }
-        Navigation.findNavController(getView()).navigate(R.id.action_groupListFragment_to_groupChatFragment);
+        Bundle bundle = new Bundle();
+        bundle.putString("fragmentTitle",chatEntity.getGroupChat().getGroupName());
+        Navigation.findNavController(getView()).navigate(R.id.action_groupListFragment_to_groupChatFragment, bundle);
     }
 
     @Override
@@ -210,11 +212,11 @@ public class GroupListFragment extends Fragment implements ChatGroupListener, Ed
     }
 
     @Override
-    public void onDialogPositiveClick(DialogFragment dialog, String titleText, String descriptionText) {
+    public void onDialogPositiveClick(DialogFragment dialog, String titleText, String descriptionText, boolean isEnabled) {
         if (titleText.isEmpty() || descriptionText.isEmpty()) {
             Snackbar.make(getView(),getString(R.string.title_description_needed), Snackbar.LENGTH_SHORT).show();
         } else {
-            updateGroupChat(titleText, descriptionText);
+            updateGroupChat(titleText, descriptionText, isEnabled);
         }
     }
 
@@ -263,10 +265,11 @@ public class GroupListFragment extends Fragment implements ChatGroupListener, Ed
         groupListViewModel.findUserChats(currentUser);
     }
 
-    private void updateGroupChat(String titleText, String descriptionText) {
+    private void updateGroupChat(String titleText, String descriptionText, boolean isEnabled) {
         UserGroupChatEntity chatEntity = editGroupDialogFragment.getChatEntity();
         chatEntity.getGroupChat().setGroupName(titleText);
         chatEntity.getGroupChat().setGroupDescription(descriptionText);
+        chatEntity.getGroupChat().setGroupEnabled(isEnabled);
         GenericResponse.RequestTypes type;
         if (chatEntity.getGroupChat().getGroupId().equals(0)) {
             type = GenericResponse.RequestTypes.NEW_GROUP;

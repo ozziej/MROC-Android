@@ -30,6 +30,7 @@
     <string name="new_group">New Group</string>
     <string name="edit_group">Edit Group</string>
     <string name="edit_users">Edit Users</string>
+    <string name="group_enabled">Group Enabled</string>
     <string name="set_as_admin">Make Admin</string>
     <string name="set_as_user">Remove as Admin</string>
     <string name="status">Status</string>
@@ -47,4 +48,5 @@
     <string name="group_image">Image or Icon for Group</string>
     <string name="terms_conditions">Terms and Conditions</string>
     <string name="terms_uri">"https://www.surveyfiesta.com/terms-and-conditions/"</string>
+    <string name="title_label">{fragmentTitle}</string>
 </resources>

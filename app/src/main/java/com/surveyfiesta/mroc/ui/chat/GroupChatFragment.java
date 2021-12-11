@@ -132,6 +132,9 @@ public class GroupChatFragment extends Fragment {
             groupUsersList = l.getGroupUsers();
 
             if (groupChat != null && currentUser != null) {
+                boolean groupEnabled = groupChat.isGroupEnabled();
+                chatTextView.setEnabled(groupEnabled);
+                sendChatButton.setEnabled(groupEnabled);
                 webSocketViewModel.initWebSocket(groupChat, currentUser);
                 webSocketViewModel.getNotificationLiveData().observe(getViewLifecycleOwner(), this::onChanged);
             }
