@@ -11,6 +11,7 @@ public class GroupUsers {
     }
 
     public GroupUsers(Users user, boolean adminUser) {
+        this.user = user;
         this.adminUser = adminUser;
     }
 

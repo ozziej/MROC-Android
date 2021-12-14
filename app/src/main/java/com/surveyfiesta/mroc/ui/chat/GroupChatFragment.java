@@ -7,6 +7,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -30,6 +31,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.android.material.snackbar.Snackbar;
@@ -38,6 +40,7 @@ import com.surveyfiesta.mroc.entities.GenericResponse;
 import com.surveyfiesta.mroc.entities.GroupChat;
 import com.surveyfiesta.mroc.entities.GroupUsers;
 import com.surveyfiesta.mroc.entities.InstantNotification;
+import com.surveyfiesta.mroc.entities.UserGroupChatEntity;
 import com.surveyfiesta.mroc.entities.Users;
 import com.surveyfiesta.mroc.ui.login.UserViewModel;
 import com.surveyfiesta.mroc.viewmodels.SavedStateViewModel;
@@ -56,6 +59,7 @@ public class GroupChatFragment extends Fragment {
     private LinearLayout chatLayout;
     private ScrollView chatScrollView;
     private Users currentUser;
+    String userToken;
     private GroupChat groupChat;
     private List<GroupUsers> groupUsersList;
 
@@ -99,7 +103,7 @@ public class GroupChatFragment extends Fragment {
         currentUser = userViewModel.getCurrentUserData().getValue();
         String groupChatUuid = stateViewModel.getCurrentChatUuid();
 
-        String userToken = stateViewModel.getCurrentUserToken();
+        userToken = stateViewModel.getCurrentUserToken();
         if (userToken == null || userToken.isEmpty()) {
             navController.navigate(R.id.loginFragment);
         } else {
@@ -114,7 +118,10 @@ public class GroupChatFragment extends Fragment {
             } else {
                 currentUser = result.getUser();
                 chatLayout.removeAllViews();
-                groupChatViewModel.findGroupChat(groupChatUuid);
+                GroupChat groupChat = new GroupChat();
+                groupChat.setGroupUuid(groupChatUuid);
+                UserGroupChatEntity chatEntity = new UserGroupChatEntity(userToken, groupChat, null);
+                groupChatViewModel.findGroupChat(chatEntity);
             }
         });
 
@@ -123,7 +130,16 @@ public class GroupChatFragment extends Fragment {
             if (!chatText.isEmpty()) {
                 hideKeyboard(view);
                 chatTextView.setText("");
-                webSocketViewModel.sendMessage(encodeMessage(groupChat.getGroupId(),currentUser.getUserId(), chatText));
+                try {
+                    InstantNotification notification = new InstantNotification();
+                    notification.setSenderId(currentUser.getUserId());
+                    notification.setRecipientId(groupChat.getGroupId());
+                    notification.setSenderName(currentUser.getOtherName());
+                    notification.setNotificationText(chatText);
+                    webSocketViewModel.sendMessage(objectMapper.writeValueAsString(notification));
+                } catch (JsonProcessingException ex) {
+                    Log.d("Error : ", ex.getLocalizedMessage());
+                }
             }
         });
 
@@ -135,7 +151,7 @@ public class GroupChatFragment extends Fragment {
                 boolean groupEnabled = groupChat.isGroupEnabled();
                 chatTextView.setEnabled(groupEnabled);
                 sendChatButton.setEnabled(groupEnabled);
-                webSocketViewModel.initWebSocket(groupChat, currentUser);
+                webSocketViewModel.initWebSocket(groupChat, userToken);
                 webSocketViewModel.getNotificationLiveData().observe(getViewLifecycleOwner(), this::onChanged);
             }
 
@@ -200,8 +216,8 @@ public class GroupChatFragment extends Fragment {
         if (groupChat != null && groupChatViewModel != null) {
             ProgressBar simpleProgressBar = getView().findViewById(R.id.loginProgressBar);
             simpleProgressBar.setVisibility(View.VISIBLE);
-
-            groupChatViewModel.findGroupChatMessages(groupChat);
+            UserGroupChatEntity chatEntity = new UserGroupChatEntity(userToken, groupChat, null);
+            groupChatViewModel.findGroupChatMessages(chatEntity);
             groupChatViewModel.getNotificationLiveDate().observe(getViewLifecycleOwner(), instantNotifications -> {
                 AtomicInteger previousDays = new AtomicInteger(0);
                 if (instantNotifications != null) {

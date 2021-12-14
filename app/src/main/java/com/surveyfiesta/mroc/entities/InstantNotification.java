@@ -1,6 +1,7 @@
 package com.surveyfiesta.mroc.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.surveyfiesta.mroc.constants.NotificationTypes;
@@ -58,14 +59,17 @@ public class InstantNotification {
         return dateTime;
     }
 
+    @JsonIgnore
     public String getFormattedTime() {
         return timeFormatter.format(this.dateTime);
     }
 
+    @JsonIgnore
     public String getFormattedDay() {
         return dateFormatter.format(this.dateTime);
     }
 
+    @JsonIgnore
     public String getFormattedDate() {
         return formatter.format(this.dateTime);
     }

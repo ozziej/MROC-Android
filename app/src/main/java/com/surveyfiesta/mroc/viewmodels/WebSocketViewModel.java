@@ -28,16 +28,16 @@ public class WebSocketViewModel extends ViewModel {
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private WebSocketListener socketListener;
     private WebSocket webSocket;
-    private MutableLiveData<InstantNotification> notificationLiveData = new MutableLiveData<>();
+    private final MutableLiveData<InstantNotification> notificationLiveData = new MutableLiveData<>();
 
-    public void initWebSocket(GroupChat groupChat, Users currentUser) {
+    public void initWebSocket(GroupChat groupChat, String userToken) {
         objectMapper.findAndRegisterModules();
         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
         socketListener = new WebSocketListener() {
             @Override
             public void onOpen(WebSocket webSocket, Response response) {
-                Log.d("Connected :",response.body().toString());
+                Log.d("Connected :" , response.body().toString());
             }
 
             @Override
@@ -72,7 +72,7 @@ public class WebSocketViewModel extends ViewModel {
                 .build();
 
         Request request = new Request.Builder()
-                .url(BASE_WEB_SOCKET+currentUser.getFirstName())
+                .url(BASE_WEB_SOCKET + userToken)
                 .build();
         webSocket = client.newWebSocket(request, socketListener);
         client.dispatcher().executorService().shutdown();

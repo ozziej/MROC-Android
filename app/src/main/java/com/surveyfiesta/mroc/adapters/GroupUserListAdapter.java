@@ -41,12 +41,11 @@ public class GroupUserListAdapter extends RecyclerView.Adapter<RecyclerView.View
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         GroupUsers groupUsers = groupUsersList.get(position);
         GroupUserViewHolder viewHolder = (GroupUserViewHolder)holder;
-        viewHolder.groupUserImageView.setImageResource(R.drawable.ic_baseline_chat_24);
+        viewHolder.groupUserImageView.setImageResource(R.drawable.ic_twotone_person_24);
         viewHolder.groupUserDisplayName.setText(groupUsers.getUser().getOtherName());
         viewHolder.groupUserStatusText.setText(groupUsers.isAdminUser()?"Admin":"User");
         viewHolder.groupUserStatusImage.setImageResource(groupUsers.isAdminUser()?R.drawable.ic_outline_verified_user_24:R.drawable.ic_baseline_perm_identity_24);
         viewHolder.itemView.setOnClickListener(view -> listener.onUserRowClickListener(view, position));
-        //viewHolder.itemView.setSelected(selectedPos == position);
         viewHolder.groupUserLayout.setBackgroundColor(selectedPos == position?ContextCompat.getColor(getContext(),android.R.color.holo_blue_bright):
                 ContextCompat.getColor(getContext(),android.R.color.white));
     }

@@ -46,6 +46,7 @@ public class GroupUserFragment extends Fragment implements GroupUserListener, Ed
     private ActionMode actionMode;
     private UserEditMenuCallback callback;
     private Users currentUser;
+    private String userToken;
 
     private SavedStateViewModel stateViewModel;
     private GroupChatViewModel groupChatViewModel;
@@ -71,7 +72,7 @@ public class GroupUserFragment extends Fragment implements GroupUserListener, Ed
         callback = new UserEditMenuCallback(this::onActionItemClicked);
 
         currentUser = userViewModel.getCurrentUserData().getValue();
-
+        userToken = stateViewModel.getCurrentUserToken();
         String groupChatUuid = stateViewModel.getCurrentChatUuid();
 
         if (groupChatUuid == null || currentUser == null) {
@@ -93,8 +94,10 @@ public class GroupUserFragment extends Fragment implements GroupUserListener, Ed
                 Snackbar.make(getView(), response.getResponseMessage(), Snackbar.LENGTH_SHORT).show();
             }
         });
-
-        groupChatViewModel.findGroupChat(groupChatUuid);
+        groupChat = new GroupChat();
+        groupChat.setGroupUuid(groupChatUuid);
+        UserGroupChatEntity chatEntity = new UserGroupChatEntity(userToken, groupChat, null);
+        groupChatViewModel.findGroupChat(chatEntity);
         groupChatViewModel.getGroupChatData().observe(getViewLifecycleOwner(), l -> {
             if (l != null) {
                 groupChat = l.getGroupChat();
@@ -144,7 +147,7 @@ public class GroupUserFragment extends Fragment implements GroupUserListener, Ed
         GroupUsers modifiedUser = groupUsersList.get(position);
         modifiedUser.setAdminUser(setAsAdmin);
         modifiedUsers.add(modifiedUser);
-        UserGroupChatEntity chatEntity = new UserGroupChatEntity(groupChat, modifiedUsers);
+        UserGroupChatEntity chatEntity = new UserGroupChatEntity(userToken, groupChat, modifiedUsers);
 
         if (currentUser.getUserId().equals(modifiedUser.getUser().getUserId())){
             Snackbar.make(getView(), "You cannot modify yourself.",Snackbar.LENGTH_SHORT).show();

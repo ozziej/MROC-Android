@@ -5,15 +5,25 @@ import java.util.List;
 
 public class UserGroupChatEntity implements Serializable {
 
+    private String userToken;
     private GroupChat groupChat;
     private List<GroupUsers> groupUsers;
 
     public UserGroupChatEntity() {
     }
 
-    public UserGroupChatEntity(GroupChat groupChat, List<GroupUsers> groupUsers) {
+    public UserGroupChatEntity(String userToken, GroupChat groupChat, List<GroupUsers> groupUsers) {
+        this.userToken = userToken;
         this.groupChat = groupChat;
         this.groupUsers = groupUsers;
+    }
+
+    public String getUserToken() {
+        return userToken;
+    }
+
+    public void setUserToken(String userToken) {
+        this.userToken = userToken;
     }
 
     public GroupChat getGroupChat() {

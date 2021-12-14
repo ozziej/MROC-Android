@@ -8,7 +8,7 @@ import com.surveyfiesta.mroc.constants.DefaultValues;
 import com.surveyfiesta.mroc.entities.GenericResponse;
 import com.surveyfiesta.mroc.entities.GroupChat;
 import com.surveyfiesta.mroc.entities.UserGroupChatEntity;
-import com.surveyfiesta.mroc.entities.Users;
+import com.surveyfiesta.mroc.entities.UserResponse;
 import com.surveyfiesta.mroc.interfaces.GroupChatService;
 
 import java.util.List;
@@ -28,7 +28,7 @@ public class GroupListViewModel extends ViewModel {
     public GroupListViewModel() {
     }
 
-    public void findUserChats(Users selectedUser) {
+    public void findUserChats(UserResponse userResponse) {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(DefaultValues.BASE_CHAT_URL)
                 .addConverterFactory(JacksonConverterFactory.create())
@@ -36,7 +36,7 @@ public class GroupListViewModel extends ViewModel {
 
         GroupChatService service = retrofit.create(GroupChatService.class);
 
-        Call<List<UserGroupChatEntity>> call = service.findGroupList(selectedUser);
+        Call<List<UserGroupChatEntity>> call = service.findGroupList(userResponse);
         call.enqueue(new Callback<List<UserGroupChatEntity>>() {
             @Override
             public void onResponse(Call<List<UserGroupChatEntity>> call, Response<List<UserGroupChatEntity>> response) {
@@ -121,7 +121,6 @@ public class GroupListViewModel extends ViewModel {
             });
         }
     }
-
 
     public LiveData<List<UserGroupChatEntity>> getGroupChatListData() {
         return groupChatListData;

@@ -46,6 +46,8 @@ public class GroupListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         if (holder instanceof GroupViewHolder) {
             GroupViewHolder groupViewHolder = (GroupViewHolder)holder;
             Integer groupId = selectedGroup.getGroupId();
+            String groupName = selectedGroup.getGroupName();
+            groupName = selectedGroup.isGroupEnabled() ? groupName : groupName + " (disabled)";
             ImageView groupImage = groupViewHolder.groupImage;
             String imageUrl = selectedGroup.getGroupImageUrl();
             if (imageUrl == null || imageUrl.isEmpty()) {
@@ -60,7 +62,7 @@ public class GroupListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                         .into(groupImage);
             }
 
-            groupViewHolder.groupNameText.setText(selectedGroup.getGroupName());
+            groupViewHolder.groupNameText.setText(groupName);
             groupViewHolder.groupDescriptionText.setText(selectedGroup.getGroupDescription());
             groupViewHolder.moreButton.setOnClickListener(view -> listener.onButtonClickListener(view, holder.getAbsoluteAdapterPosition()));
             groupViewHolder.itemView.setOnClickListener(view -> listener.onRowClickListener(view, holder.getAbsoluteAdapterPosition()));

@@ -25,7 +25,7 @@ public class GroupChatViewModel extends ViewModel {
     public GroupChatViewModel() {
     }
 
-    public void findGroupChatMessages(GroupChat selectedGroup) {
+    public void findGroupChatMessages(UserGroupChatEntity chatEntity) {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(DefaultValues.BASE_CHAT_URL)
                 .addConverterFactory(JacksonConverterFactory.create())
@@ -33,8 +33,8 @@ public class GroupChatViewModel extends ViewModel {
 
         GroupChatService service = retrofit.create(GroupChatService.class);
 
-        if (selectedGroup != null) {
-            Call<List<InstantNotification>> call = service.getGroupMessages(selectedGroup);
+        if (chatEntity != null) {
+            Call<List<InstantNotification>> call = service.getGroupMessages(chatEntity);
             call.enqueue(new Callback<List<InstantNotification>>() {
                 @Override
                 public void onResponse(Call<List<InstantNotification>> call, Response<List<InstantNotification>> response) {
@@ -53,16 +53,14 @@ public class GroupChatViewModel extends ViewModel {
         }
     }
 
-    public void findGroupChat(String groupUuid) {
+    public void findGroupChat(UserGroupChatEntity chatRequest) {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(DefaultValues.BASE_CHAT_URL)
                 .addConverterFactory(JacksonConverterFactory.create())
                 .build();
 
         GroupChatService service = retrofit.create(GroupChatService.class);
-        GroupChat groupChat = new GroupChat();
-        groupChat.setGroupUuid(groupUuid);
-        Call<UserGroupChatEntity> call = service.findGroupByUuid(groupChat);
+        Call<UserGroupChatEntity> call = service.findGroupByUuid(chatRequest);
         call.enqueue(new Callback<UserGroupChatEntity>() {
             @Override
             public void onResponse(Call<UserGroupChatEntity> call, Response<UserGroupChatEntity> response) {
