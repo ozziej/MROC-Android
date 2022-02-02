@@ -180,6 +180,7 @@ public class GroupListFragment extends Fragment implements ChatGroupListener, Ed
         usersList.add(groupUsers);
         chatEntity.setGroupChat(new GroupChat());
         chatEntity.setGroupUsers(usersList);
+        chatEntity.setUserToken(userToken);
         editGroupDialogFragment = new EditGroupDialogFragment(chatEntity);
         editGroupDialogFragment.show(getChildFragmentManager(),"newGroupDialog");
     }
@@ -190,6 +191,9 @@ public class GroupListFragment extends Fragment implements ChatGroupListener, Ed
                 .filter(i-> i.getUser().getUserId().equals(currentUser.getUserId()))
                 .anyMatch(i-> i.isAdminUser());
         if (adminUser) {
+            if (chatEntity.getUserToken() == null || chatEntity.getUserToken().isEmpty()){
+                chatEntity.setUserToken(userToken);
+            }
             editGroupDialogFragment = new EditGroupDialogFragment(chatEntity);
             editGroupDialogFragment.show(getChildFragmentManager(), "editGroupDialog");
         } else {
