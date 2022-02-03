@@ -19,8 +19,8 @@ import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
 public class GroupChatViewModel extends ViewModel {
-    MutableLiveData <List<InstantNotification>> notificationLiveDate = new MutableLiveData<>();
-    private final MutableLiveData <UserGroupChatEntity> groupChatData = new MutableLiveData<>();
+    private MutableLiveData <List<InstantNotification>> notificationLiveDate = new MutableLiveData<>();
+    private MutableLiveData <UserGroupChatEntity> groupChatData ;
 
     public GroupChatViewModel() {
     }
@@ -83,6 +83,9 @@ public class GroupChatViewModel extends ViewModel {
     }
 
     public LiveData<UserGroupChatEntity> getGroupChatData() {
+        if (groupChatData == null) {
+            groupChatData = new MutableLiveData<>();
+        }
         return groupChatData;
     }
 }

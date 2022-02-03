@@ -73,11 +73,39 @@ public class GroupListFragment extends Fragment implements ChatGroupListener, Ed
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         groupListViewModel = new ViewModelProvider(this).get(GroupListViewModel.class);
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
         stateViewModel = new ViewModelProvider(requireActivity()).get(SavedStateViewModel.class);
+
+        userViewModel.getLoginResult().observe(this, result -> {
+            if (!result.getResponseCode().equals(GenericResponse.ResponseCode.SUCCESSFUL)) {
+                displayMessage(result.getResponseMessage());
+            } else {
+                currentUser = result.getUser();
+                findUserChats();
+            }
+        });
+
+        groupListViewModel.getGroupChatListData().observe(this, groupChatList -> {
+            updateRecyclerView(groupChatList);
+        });
+
+        groupListViewModel.getGenericResponseData().observe(this, response -> {
+            if (response != null) {
+                displayMessage(response.getResponseMessage());
+                UserResponse userResponse = new UserResponse(currentUser, userToken);
+                groupListAdapter.clear();
+                groupListViewModel.findUserChats(userResponse);
+                groupListViewModel.setGenericResponseData(null);
+            }
+        });
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         final NavController navController = Navigation.findNavController(view);
         currentUser = userViewModel.getCurrentUserData().getValue();
 
@@ -89,48 +117,6 @@ public class GroupListFragment extends Fragment implements ChatGroupListener, Ed
                 userViewModel.login(userToken);
             }
         }
-
-        userViewModel.getLoginResult().observe(getViewLifecycleOwner(), result -> {
-            if (!result.getResponseCode().equals(GenericResponse.ResponseCode.SUCCESSFUL)) {
-                Snackbar.make(view, result.getResponseMessage(), Snackbar.LENGTH_SHORT).show();
-            } else {
-                currentUser = result.getUser();
-                UserResponse userResponse = new UserResponse(currentUser, userToken);
-                if (groupListViewModel.getGroupChatListData().getValue() == null || groupListViewModel.getGroupChatListData().getValue().isEmpty()) {
-                    groupListViewModel.findUserChats(userResponse);
-                }
-            }
-        });
-
-        groupListViewModel.getGroupChatListData().observe(getViewLifecycleOwner(), groupChatList -> {
-            if (groupChatList != null) {
-                recyclerView = view.findViewById(R.id.groupListRecycler);
-                List<GroupChatRecyclerEntity> list = new ArrayList<>();
-                groupChatList.forEach(i -> list.add(new GroupChatRecyclerEntity(i)));
-                if (groupListAdapter == null) {
-                    groupListAdapter = new GroupListAdapter(list, getContext(), this);
-                } else {
-                    groupListAdapter.setGroupList(list);
-                }
-                recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-                recyclerView.setHasFixedSize(true);
-                recyclerView.setAdapter(groupListAdapter);
-            } else {
-                Snackbar.make(getView(), "There seems to be a problem, please try again.", Snackbar.LENGTH_SHORT).show();
-                NavHostFragment.findNavController(this).popBackStack();
-            }
-            swipeGroupContainer.setRefreshing(false);
-        });
-
-        groupListViewModel.getGenericResponseData().observe(getViewLifecycleOwner(), response -> {
-            if (response != null) {
-                Snackbar.make(getView(), response.getResponseMessage(), Snackbar.LENGTH_SHORT).show();
-                UserResponse userResponse = new UserResponse(currentUser, userToken);
-                groupListAdapter.clear();
-                groupListViewModel.findUserChats(userResponse);
-                groupListViewModel.setGenericResponseData(null);
-            }
-        });
 
         swipeGroupContainer = view.findViewById(R.id.swipeGroupContainer);
         swipeGroupContainer.setOnRefreshListener(() -> {
@@ -145,6 +131,10 @@ public class GroupListFragment extends Fragment implements ChatGroupListener, Ed
                 android.R.color.holo_red_light);
         swipeGroupContainer.setRefreshing(true);
         callback = new GroupEditMenuCallback(this::onActionItemClicked);
+
+        recyclerView = view.findViewById(R.id.groupListRecycler);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setHasFixedSize(true);
     }
 
     @Override
@@ -166,39 +156,6 @@ public class GroupListFragment extends Fragment implements ChatGroupListener, Ed
                 break;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    private void showJoinGroupDialog() {
-        joinGroupDialogFragment = new JoinGroupDialogFragment();
-        joinGroupDialogFragment.show(getChildFragmentManager(), "joinGroupDialog");
-    }
-
-    private void showNewGroupDialog() {
-        UserGroupChatEntity chatEntity = new UserGroupChatEntity();
-        List<GroupUsers> usersList = new ArrayList<>();
-        GroupUsers groupUsers = new GroupUsers(currentUser, true);
-        usersList.add(groupUsers);
-        chatEntity.setGroupChat(new GroupChat());
-        chatEntity.setGroupUsers(usersList);
-        chatEntity.setUserToken(userToken);
-        editGroupDialogFragment = new EditGroupDialogFragment(chatEntity);
-        editGroupDialogFragment.show(getChildFragmentManager(),"newGroupDialog");
-    }
-
-    private void showEditGroupDialog(int position) {
-        UserGroupChatEntity chatEntity = groupListAdapter.getGroupList().get(position).getChatEntity();
-        boolean adminUser = chatEntity.getGroupUsers().stream()
-                .filter(i-> i.getUser().getUserId().equals(currentUser.getUserId()))
-                .anyMatch(i-> i.isAdminUser());
-        if (adminUser) {
-            if (chatEntity.getUserToken() == null || chatEntity.getUserToken().isEmpty()){
-                chatEntity.setUserToken(userToken);
-            }
-            editGroupDialogFragment = new EditGroupDialogFragment(chatEntity);
-            editGroupDialogFragment.show(getChildFragmentManager(), "editGroupDialog");
-        } else {
-            Snackbar.make(getView(), "You cannot edit this group!", Snackbar.LENGTH_SHORT).show();
-        }
     }
 
     @Override
@@ -258,6 +215,81 @@ public class GroupListFragment extends Fragment implements ChatGroupListener, Ed
     public void onJoinDialogNegativeClick(DialogFragment dialog) {
     }
 
+    @Override
+    public boolean onActionItemClicked(MenuItem item) {
+        int position = callback.getRowPosition();
+        switch (item.getItemId()) {
+            case R.id.button_edit_group:
+                showEditGroupDialog(position);
+                break;
+            case R.id.button_leave_group:
+                confirmLeaveChat(position);
+                break;
+            case R.id.button_share_group:
+                shareItem(position);
+                break;
+            default:
+                break;
+        }
+        return false;
+    }
+
+    @Override
+    public void onDestroy() {
+        if (actionMode != null) {
+            actionMode.finish();
+        }
+        super.onDestroy();
+    }
+
+    @Override
+    public void onResume() {
+        findUserChats();
+        super.onResume();
+    }
+
+    private void findUserChats() {
+        UserResponse userResponse = new UserResponse(currentUser, userToken);
+        if (groupListViewModel.getGroupChatListData().getValue() == null || groupListViewModel.getGroupChatListData().getValue().isEmpty()) {
+            groupListViewModel.findUserChats(userResponse);
+        } else {
+            updateRecyclerView(groupListViewModel.getGroupChatListData().getValue());
+        }
+    }
+
+    private void showJoinGroupDialog() {
+        joinGroupDialogFragment = new JoinGroupDialogFragment();
+        joinGroupDialogFragment.show(getChildFragmentManager(), "joinGroupDialog");
+    }
+
+    private void showNewGroupDialog() {
+        UserGroupChatEntity chatEntity = new UserGroupChatEntity();
+        List<GroupUsers> usersList = new ArrayList<>();
+        GroupUsers groupUsers = new GroupUsers(currentUser, true);
+        usersList.add(groupUsers);
+        chatEntity.setGroupChat(new GroupChat());
+        chatEntity.setGroupUsers(usersList);
+        chatEntity.setUserToken(userToken);
+        editGroupDialogFragment = new EditGroupDialogFragment(chatEntity);
+        editGroupDialogFragment.show(getChildFragmentManager(),"newGroupDialog");
+    }
+
+    private void showEditGroupDialog(int position) {
+        UserGroupChatEntity chatEntity = groupListAdapter.getGroupList().get(position).getChatEntity();
+        boolean adminUser = chatEntity.getGroupUsers().stream()
+                .filter(i-> i.getUser().getUserId().equals(currentUser.getUserId()))
+                .anyMatch(i-> i.isAdminUser());
+        if (adminUser) {
+            if (chatEntity.getUserToken() == null || chatEntity.getUserToken().isEmpty()){
+                chatEntity.setUserToken(userToken);
+            }
+            editGroupDialogFragment = new EditGroupDialogFragment(chatEntity);
+            editGroupDialogFragment.show(getChildFragmentManager(), "editGroupDialog");
+        } else {
+            Snackbar.make(getView(), "You cannot edit this group!", Snackbar.LENGTH_SHORT).show();
+        }
+    }
+
     private void confirmLeaveChat(int position) {
         UserGroupChatEntity chatEntity = groupListAdapter.getGroupList().get(position).getChatEntity();
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -306,30 +338,25 @@ public class GroupListFragment extends Fragment implements ChatGroupListener, Ed
         }
     }
 
-    @Override
-    public boolean onActionItemClicked(MenuItem item) {
-        int position = callback.getRowPosition();
-        switch (item.getItemId()) {
-            case R.id.button_edit_group:
-                showEditGroupDialog(position);
-                break;
-            case R.id.button_leave_group:
-                confirmLeaveChat(position);
-                break;
-            case R.id.button_share_group:
-                shareItem(position);
-                break;
-            default:
-                break;
+    private void updateRecyclerView(List<UserGroupChatEntity> groupChatList) {
+        if (groupChatList != null) {
+            List<GroupChatRecyclerEntity> list = new ArrayList<>();
+            groupChatList.forEach(i -> list.add(new GroupChatRecyclerEntity(i)));
+            if (groupListAdapter == null) {
+                groupListAdapter = new GroupListAdapter(list, getContext(), this);
+            } else {
+                groupListAdapter.setGroupList(list);
+            }
+            recyclerView.setAdapter(groupListAdapter);
+            swipeGroupContainer.setRefreshing(false);
+        } else {
+            displayMessage("There seems to be a problem, please try again.");
+            NavHostFragment.findNavController(this).popBackStack();
         }
-        return false;
     }
 
-    @Override
-    public void onDestroy() {
-        if (actionMode != null) {
-            actionMode.finish();
-        }
-        super.onDestroy();
+    private void displayMessage(String message) {
+        Snackbar.make(getView(), message, Snackbar.LENGTH_SHORT).show();
     }
+
 }
