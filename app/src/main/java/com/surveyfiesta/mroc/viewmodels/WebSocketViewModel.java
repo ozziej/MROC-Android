@@ -12,9 +12,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.surveyfiesta.mroc.entities.GenericResponse;
 import com.surveyfiesta.mroc.entities.GroupChat;
 import com.surveyfiesta.mroc.entities.InstantNotification;
-import com.surveyfiesta.mroc.entities.Users;
 
 import java.util.concurrent.TimeUnit;
 
@@ -26,25 +26,30 @@ import okhttp3.WebSocketListener;
 
 public class WebSocketViewModel extends ViewModel {
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    private WebSocketListener socketListener;
+
     private WebSocket webSocket;
     private final MutableLiveData<InstantNotification> notificationLiveData = new MutableLiveData<>();
+    private final MutableLiveData<GenericResponse> responseNotification = new MutableLiveData<>();
 
     public void initWebSocket(GroupChat groupChat, String userToken) {
         objectMapper.findAndRegisterModules();
         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
-        socketListener = new WebSocketListener() {
+        WebSocketListener socketListener = new WebSocketListener() {
             @Override
             public void onOpen(WebSocket webSocket, Response response) {
-                Log.d("Connected :" , response.body().toString());
+                if (response.isSuccessful()) {
+                    responseNotification.postValue(new GenericResponse(GenericResponse.ResponseCode.SUCCESSFUL, "Joined Group", GenericResponse.RequestCode.CHAT));
+                } else {
+                    responseNotification.postValue(new GenericResponse(GenericResponse.ResponseCode.ERROR, "Unable to Join", GenericResponse.RequestCode.CHAT));
+                }
             }
 
             @Override
             public void onMessage(WebSocket webSocket, String text) {
                 final InstantNotification notification;
                 try {
-                    notification = objectMapper.readValue(text, new TypeReference<InstantNotification>() {
+                        notification = objectMapper.readValue(text, new TypeReference<InstantNotification>() {
                     });
                     Integer groupId = notification.getRecipientId();
                     if (groupChat != null && groupChat.getGroupId().equals(groupId)) {
@@ -57,12 +62,13 @@ public class WebSocketViewModel extends ViewModel {
 
             @Override
             public void onClosed(WebSocket webSocket, int code, String reason) {
-                Log.d("Closed:","Closed connection to "+groupChat.getGroupName());
+                responseNotification.postValue(new GenericResponse(GenericResponse.ResponseCode.SUCCESSFUL, "Ended Chat with "+groupChat.getGroupName(), GenericResponse.RequestCode.CHAT));
                 super.onClosed(webSocket, code, reason);
             }
 
             @Override
             public void onFailure(WebSocket webSocket, Throwable t, @Nullable Response response) {
+                responseNotification.postValue(new GenericResponse(GenericResponse.ResponseCode.ERROR, "Unable to Join", GenericResponse.RequestCode.CHAT));
                 Log.e("Error :",t.getLocalizedMessage());
             }
         };
@@ -72,7 +78,7 @@ public class WebSocketViewModel extends ViewModel {
                 .build();
 
         Request request = new Request.Builder()
-                .url(BASE_WEB_SOCKET + userToken)
+                .url(BASE_WEB_SOCKET+ "/" + groupChat.getGroupId() + "/" + userToken)
                 .build();
         webSocket = client.newWebSocket(request, socketListener);
         client.dispatcher().executorService().shutdown();

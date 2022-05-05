@@ -6,7 +6,7 @@ import org.apache.commons.text.WordUtils;
 
 public enum NotificationTypes {
         USER, SURVEY, UPGRADE, POINTS,
-        CONNECT, DISCONNECT, MESSAGE;
+        CONNECT, DISCONNECT, MESSAGE, SYSTEM_MESSAGE, PING, PONG;
 
         private static final Map<String, String> BY_DESCRIPTION = new LinkedHashMap<>();
 

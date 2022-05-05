@@ -1,5 +1,7 @@
 package com.surveyfiesta.mroc.ui.grouplist;
 
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -35,7 +37,6 @@ public class GroupListViewModel extends ViewModel {
                 .build();
 
         GroupChatService service = retrofit.create(GroupChatService.class);
-
         Call<List<UserGroupChatEntity>> call = service.findGroupList(userResponse);
         call.enqueue(new Callback<List<UserGroupChatEntity>>() {
             @Override
@@ -49,6 +50,7 @@ public class GroupListViewModel extends ViewModel {
 
             @Override
             public void onFailure(Call<List<UserGroupChatEntity>> call, Throwable t) {
+                Log.e("ERROR:", "Something went wrong", t);
                 groupChatListData.setValue(null);
             }
         });

@@ -6,12 +6,15 @@ import androidx.lifecycle.ViewModel;
 
 import com.surveyfiesta.mroc.constants.DefaultValues;
 import com.surveyfiesta.mroc.entities.GroupChat;
+import com.surveyfiesta.mroc.entities.GroupChatItemRequest;
 import com.surveyfiesta.mroc.entities.InstantNotification;
 import com.surveyfiesta.mroc.entities.UserGroupChatEntity;
 import com.surveyfiesta.mroc.interfaces.GroupChatService;
 
 import java.util.List;
 
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -25,7 +28,7 @@ public class GroupChatViewModel extends ViewModel {
     public GroupChatViewModel() {
     }
 
-    public void findGroupChatMessages(UserGroupChatEntity chatEntity) {
+    public void findGroupChatMessages(GroupChatItemRequest itemRequest) {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(DefaultValues.BASE_CHAT_URL)
                 .addConverterFactory(JacksonConverterFactory.create())
@@ -33,8 +36,8 @@ public class GroupChatViewModel extends ViewModel {
 
         GroupChatService service = retrofit.create(GroupChatService.class);
 
-        if (chatEntity != null) {
-            Call<List<InstantNotification>> call = service.getGroupMessages(chatEntity);
+        if (itemRequest != null) {
+            Call<List<InstantNotification>> call = service.getGroupMessages(itemRequest);
             call.enqueue(new Callback<List<InstantNotification>>() {
                 @Override
                 public void onResponse(Call<List<InstantNotification>> call, Response<List<InstantNotification>> response) {
@@ -54,8 +57,13 @@ public class GroupChatViewModel extends ViewModel {
     }
 
     public void findGroupChat(UserGroupChatEntity chatRequest) {
+        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+        interceptor.level(HttpLoggingInterceptor.Level.BODY);
+        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
+
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(DefaultValues.BASE_CHAT_URL)
+                .client(client)
                 .addConverterFactory(JacksonConverterFactory.create())
                 .build();
 
@@ -64,7 +72,7 @@ public class GroupChatViewModel extends ViewModel {
         call.enqueue(new Callback<UserGroupChatEntity>() {
             @Override
             public void onResponse(Call<UserGroupChatEntity> call, Response<UserGroupChatEntity> response) {
-                if (response.isSuccessful()) {
+                    if (response.isSuccessful()) {
                     groupChatData.setValue(response.body());
                 } else {
                     groupChatData.setValue(null);

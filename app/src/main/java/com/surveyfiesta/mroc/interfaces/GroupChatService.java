@@ -2,6 +2,7 @@ package com.surveyfiesta.mroc.interfaces;
 
 import com.surveyfiesta.mroc.entities.GenericResponse;
 import com.surveyfiesta.mroc.entities.GroupChat;
+import com.surveyfiesta.mroc.entities.GroupChatItemRequest;
 import com.surveyfiesta.mroc.entities.InstantNotification;
 import com.surveyfiesta.mroc.entities.UserGroupChatEntity;
 import com.surveyfiesta.mroc.entities.UserResponse;
@@ -23,7 +24,7 @@ public interface GroupChatService {
     Call<GenericResponse> joinGroupByUuid(@Body UserGroupChatEntity chatRequest);
 
     @POST("getGroupMessages")
-    Call<List<InstantNotification>> getGroupMessages(@Body UserGroupChatEntity chatRequest);
+    Call<List<InstantNotification>> getGroupMessages(@Body GroupChatItemRequest itemRequest);
 
     @POST("createGroup")
     Call<GenericResponse> createGroup(@Body UserGroupChatEntity chatRequest);

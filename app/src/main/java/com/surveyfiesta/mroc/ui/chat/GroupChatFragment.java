@@ -5,8 +5,11 @@ import static android.content.Context.INPUT_METHOD_SERVICE;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.text.SpannableStringBuilder;
+import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -36,8 +39,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.android.material.snackbar.Snackbar;
 import com.surveyfiesta.mroc.R;
+import com.surveyfiesta.mroc.constants.NotificationTypes;
 import com.surveyfiesta.mroc.entities.GenericResponse;
 import com.surveyfiesta.mroc.entities.GroupChat;
+import com.surveyfiesta.mroc.entities.GroupChatItemRequest;
 import com.surveyfiesta.mroc.entities.GroupUsers;
 import com.surveyfiesta.mroc.entities.InstantNotification;
 import com.surveyfiesta.mroc.entities.UserGroupChatEntity;
@@ -69,7 +74,7 @@ public class GroupChatFragment extends Fragment {
     private WebSocketViewModel webSocketViewModel;
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd MMMM YYYY");
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy");
 
     ProgressBar simpleProgressBar;
 
@@ -102,18 +107,19 @@ public class GroupChatFragment extends Fragment {
         });
 
         groupChatViewModel.getGroupChatData().observe(this, l -> {
-            groupChat = l.getGroupChat();
-            groupUsersList = l.getGroupUsers();
+            if (l != null) {
+                groupChat = l.getGroupChat();
+                groupUsersList = l.getGroupUsers();
 
-            if (groupChat != null && currentUser != null) {
-                boolean groupEnabled = groupChat.isGroupEnabled();
-                chatTextView.setEnabled(groupEnabled);
-                sendChatButton.setEnabled(groupEnabled);
-                webSocketViewModel.initWebSocket(groupChat, userToken);
-                webSocketViewModel.getNotificationLiveData().observe(this, this::onChanged);
+                if (groupChat != null && currentUser != null) {
+                    boolean groupEnabled = groupChat.isGroupEnabled();
+                    chatTextView.setEnabled(groupEnabled);
+                    sendChatButton.setEnabled(groupEnabled);
+                    webSocketViewModel.initWebSocket(groupChat, userToken);
+                    webSocketViewModel.getNotificationLiveData().observe(this, this::onChanged);
+                }
+                getInitialMessages();
             }
-            getInitialMessages();
-
         });
 
         groupChatViewModel.getNotificationLiveDate().observe(this, instantNotifications -> {
@@ -169,6 +175,7 @@ public class GroupChatFragment extends Fragment {
                     notification.setSenderId(currentUser.getUserId());
                     notification.setRecipientId(groupChat.getGroupId());
                     notification.setSenderName(currentUser.getOtherName());
+                    notification.setNotificationTitle("Chat");
                     notification.setNotificationText(chatText);
                     webSocketViewModel.sendMessage(objectMapper.writeValueAsString(notification));
                 } catch (JsonProcessingException ex) {
@@ -187,12 +194,8 @@ public class GroupChatFragment extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch(item.getItemId()) {
-            case R.id.editGroupUsersButton:
-                showUserListFragment();
-                break;
-            default:
-                break;
+        if (item.getItemId() == R.id.editGroupUsersButton) {
+            showUserListFragment();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -231,7 +234,7 @@ public class GroupChatFragment extends Fragment {
     private void onChanged(InstantNotification notification) {
         if (notification != null) {
             Activity activity = getActivity();
-            if (activity != null) {
+            if (activity != null && !notification.getNotificationType().equals(NotificationTypes.PONG.toString())) {
                 activity.runOnUiThread(() -> addMessageBox(notification));
             }
         }
@@ -241,8 +244,8 @@ public class GroupChatFragment extends Fragment {
         simpleProgressBar = getView().findViewById(R.id.loginProgressBar);
         simpleProgressBar.setVisibility(View.VISIBLE);
         if (groupChat != null && groupChatViewModel != null) {
-            UserGroupChatEntity chatEntity = new UserGroupChatEntity(userToken, groupChat, null);
-            groupChatViewModel.findGroupChatMessages(chatEntity);
+            GroupChatItemRequest itemRequest = new GroupChatItemRequest(userToken, groupChat.getGroupId(), "",10);
+            groupChatViewModel.findGroupChatMessages(itemRequest);
         }
     }
 
@@ -261,9 +264,20 @@ public class GroupChatFragment extends Fragment {
         TextView senderName = view.findViewById(R.id.chatBubbleSenderName);
         TextView textView = view.findViewById(R.id.chatBubbleTextView);
         TextView chatTime = view.findViewById(R.id.chatTime);
-
-        textView.setText(notification.getNotificationText());
         textView.setTextColor(Color.BLACK);
+        textView.setPadding(4,0,4,0);
+        textView.setMinEms(4);
+
+        if (notification.getNotificationType().equals(NotificationTypes.SYSTEM_MESSAGE.toString())) {
+            SpannableStringBuilder builder = new SpannableStringBuilder();
+            builder.append(notification.getNotificationTitle(), new StyleSpan(Typeface.BOLD),0);
+            builder.append("\n", new StyleSpan(Typeface.NORMAL),0);
+            builder.append(notification.getNotificationText(), new StyleSpan(Typeface.NORMAL),0);
+            textView.setText(builder);
+        } else {
+            textView.setText(notification.getNotificationText());
+            textView.setMaxEms(12);
+        }
 
         bubbleTime = notification.getFormattedTime();
         chatTime.setText(bubbleTime);
@@ -271,9 +285,6 @@ public class GroupChatFragment extends Fragment {
 
         senderName.setText(notification.getSenderName());
         senderName.setPadding(4,0,4,0);
-        textView.setPadding(4,0,4,0);
-        textView.setMinEms(4);
-        textView.setMaxEms(12);
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         layoutParams.weight = 10.0f;
         layoutParams.topMargin = 4;
@@ -286,10 +297,10 @@ public class GroupChatFragment extends Fragment {
         drawable.setCornerRadius(10);
 
         if (isCurrentUser) {
-            layoutParams.gravity = Gravity.RIGHT;
+            layoutParams.gravity = Gravity.END;
             drawable.setColor(ContextCompat.getColor(getContext(), R.color.sf_green));
         } else {
-            layoutParams.gravity = Gravity.LEFT;
+            layoutParams.gravity = Gravity.START;
             drawable.setColor(ContextCompat.getColor(getContext(), R.color.light_grey));
         }
         view.setBackground(drawable);

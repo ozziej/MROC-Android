@@ -90,7 +90,7 @@ public class LoginFragment extends Fragment {
 
         passwordText.setOnEditorActionListener((textView, i, keyEvent) -> {
             boolean handled = false;
-            if (keyEvent.getAction() == KeyEvent.ACTION_DOWN && keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+            if (keyEvent != null && keyEvent.getAction() == KeyEvent.ACTION_DOWN && keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
                 String emailAddress = emailAddressText.getText().toString();
                 String password = passwordText.getText().toString();
                 hideKeyboard(view);
